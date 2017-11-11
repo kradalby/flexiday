@@ -23,18 +23,18 @@
   "homepage": "https://github.com/flexiday/enigma",
   "devDependencies": {
     "bootstrap": "^4.0.0-beta",
-    "copy-webpack-plugin": "^4.1.1",
-    "cross-env": "^5.0.5",
+    "copy-webpack-plugin": "^4.2.0",
+    "cross-env": "^5.1.1",
     "css-loader": "^0.28.7",
     "elm-hot-loader": "^0.5.4",
-    "elm-webpack-loader": "^4.3.1",
+    "elm-webpack-loader": "^4.4.0",
     "file-loader": "^1.1.5",
-    "node-sass": "^4.5.3",
+    "node-sass": "^4.6.0",
     "sass-loader": "^6.0.6",
     "style-loader": "^0.19.0",
     "url-loader": "^0.6.2",
-    "webpack": "^3.6.0",
+    "webpack": "^3.8.1",
     "webpack-dev-middleware": "^1.12.0",
-    "webpack-dev-server": "^2.9.1"
+    "webpack-dev-server": "^2.9.4"
   }
 }
