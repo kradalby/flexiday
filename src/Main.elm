@@ -7,7 +7,7 @@ import Html.Events exposing (..)
 import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for, href)
 import Json.Decode exposing (Decoder, int, string, list)
 import Task
-import Time.Date exposing (Date, date, Weekday, DateDelta, delta, toISO8601)
+import Time.Date as Date
 import DateTimePicker
 import DateTimePicker.Config exposing (defaultDatePickerConfig, defaultDateTimePickerConfig, defaultDateI18n)
 import DateTimePicker.Css
@@ -43,7 +43,7 @@ type LeaveType
 
 
 type alias LeaveDay =
-    { date : Date
+    { date : Date.Date
     , leaveType : LeaveType
     }
 
@@ -162,12 +162,12 @@ elmMonthToInt month =
             12
 
 
-elmDateToTimeDate : StdDate.Date -> Date
+elmDateToTimeDate : StdDate.Date -> Date.Date
 elmDateToTimeDate d =
-    date (StdDate.year d) (elmMonthToInt <| StdDate.month d) (StdDate.day d)
+    Date.date (StdDate.year d) (elmMonthToInt <| StdDate.month d) (StdDate.day d)
 
 
-leaveDay : Date -> LeaveType -> LeaveDay
+leaveDay : Date.Date -> LeaveType -> LeaveDay
 leaveDay d lt =
     { date = d
     , leaveType = lt
@@ -189,9 +189,38 @@ createVacationDaysList startDate endDate =
                     [ leaveDay (elmDateToTimeDate end) Flexi ]
 
                 ( Just start, Just end ) ->
-                    [ leaveDay (elmDateToTimeDate start) Flexi, leaveDay (elmDateToTimeDate end) Flexi ]
+                    calculateVacationDays (elmDateToTimeDate start) (elmDateToTimeDate end)
     in
         vdays
+
+
+datesBetween : Date.Date -> Date.Date -> List Date.Date
+datesBetween start end =
+    if (Date.compare start end) == LT then
+        let
+            datesBetweenRec : Date.Date -> Date.Date -> List Date.Date -> List Date.Date
+            datesBetweenRec current end result =
+                let
+                    newCurrent =
+                        Date.addDays 1 current
+                in
+                    if current == end then
+                        result
+                    else
+                        datesBetweenRec newCurrent end (current :: result)
+        in
+            List.reverse <| datesBetweenRec start end []
+    else
+        []
+
+
+calculateVacationDays : Date.Date -> Date.Date -> List LeaveDay
+calculateVacationDays startDate endDate =
+    let
+        dates =
+            datesBetween startDate endDate
+    in
+        List.map (\d -> leaveDay d Flexi) dates
 
 
 view : Model -> Html Msg
@@ -228,7 +257,7 @@ viewVacationDays vacationDays =
 viewLeaveDay : LeaveDay -> Html Msg
 viewLeaveDay leaveDay =
     tr []
-        [ td [] [ text <| (toISO8601 leaveDay.date) ]
+        [ td [] [ text <| (Date.toISO8601 leaveDay.date) ]
         , td [] [ text <| (toString leaveDay.leaveType) ]
         ]
 
@@ -306,17 +335,17 @@ subscriptions model =
     Sub.none
 
 
-estecHolidays : List Date
+estecHolidays : List Date.Date
 estecHolidays =
-    [ date 2017 12 24
-    , date 2017 12 25
-    , date 2017 12 26
-    , date 2017 12 27
-    , date 2017 12 28
-    , date 2017 12 29
-    , date 2017 12 30
-    , date 2017 12 31
-    , date 2018 1 1
+    [ Date.date 2017 12 24
+    , Date.date 2017 12 25
+    , Date.date 2017 12 26
+    , Date.date 2017 12 27
+    , Date.date 2017 12 28
+    , Date.date 2017 12 29
+    , Date.date 2017 12 30
+    , Date.date 2017 12 31
+    , Date.date 2018 1 1
     ]
 
 
