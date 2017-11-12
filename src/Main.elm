@@ -13,6 +13,12 @@ import DateTimePicker.Config exposing (defaultDatePickerConfig, defaultDateTimeP
 import DateTimePicker.Css
 
 
+workDaysBetweenFlexi : Int
+workDaysBetweenFlexi =
+    5
+
+
+
 -- i18n : DateTimePicker.Config.I18n
 -- i18n =
 --     { defaultDateI18n
@@ -40,11 +46,29 @@ type LeaveType
     = Flexi
     | Annual
     | Holiday
+    | Weekend
 
 
 type alias LeaveDay =
     { date : Date.Date
     , leaveType : LeaveType
+    }
+
+
+type alias Usage =
+    { annualLeave : Int
+    , flexiLeave : Int
+    , weekendLeave : Int
+    , holidayLeave : Int
+    }
+
+
+initUsage : Usage
+initUsage =
+    { annualLeave = 0
+    , flexiLeave = 0
+    , weekendLeave = 0
+    , holidayLeave = 0
     }
 
 
@@ -55,6 +79,7 @@ type alias Model =
     , startDatePickerState : DateTimePicker.State
     , endDatePickerState : DateTimePicker.State
     , vacationDays : List LeaveDay
+    , usage : Usage
     }
 
 
@@ -66,6 +91,7 @@ init =
       , startDatePickerState = DateTimePicker.initialState
       , endDatePickerState = DateTimePicker.initialState
       , vacationDays = []
+      , usage = initUsage
       }
     , Cmd.batch
         [ DateTimePicker.initialCmd StartDateChanged DateTimePicker.initialState
@@ -80,6 +106,7 @@ type Msg
     | SetDate StdDate.Date
     | StartDateChanged DateTimePicker.State (Maybe StdDate.Date)
     | EndDateChanged DateTimePicker.State (Maybe StdDate.Date)
+    | ComputeVacationDays
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -92,22 +119,30 @@ update msg model =
             ( { model | date = Just date }, Cmd.none )
 
         StartDateChanged state value ->
-            ( { model
+            { model
                 | startDateValue = value
                 , startDatePickerState = state
-                , vacationDays = createVacationDaysList value model.endDateValue
-              }
-            , Cmd.none
-            )
+            }
+                |> update ComputeVacationDays
 
         EndDateChanged state value ->
-            ( { model
+            { model
                 | endDateValue = value
                 , endDatePickerState = state
-                , vacationDays = createVacationDaysList model.startDateValue value
-              }
-            , Cmd.none
-            )
+            }
+                |> update ComputeVacationDays
+
+        ComputeVacationDays ->
+            let
+                vacationDays =
+                    createVacationDaysList model.startDateValue model.endDateValue
+            in
+                ( { model
+                    | vacationDays = vacationDays
+                    , usage = (usageStatistics vacationDays)
+                  }
+                , Cmd.none
+                )
 
 
 onEnter : Msg -> Attribute Msg
@@ -204,7 +239,7 @@ datesBetween start end =
                     newCurrent =
                         Date.addDays 1 current
                 in
-                    if current == end then
+                    if current == (Date.addDays 1 end) then
                         result
                     else
                         datesBetweenRec newCurrent end (current :: result)
@@ -219,18 +254,84 @@ calculateVacationDays startDate endDate =
     let
         dates =
             datesBetween startDate endDate
+
+        calculateVacationDaysRec workDaysSinceLastFlexi dates vacationDays =
+            case dates of
+                [] ->
+                    vacationDays
+
+                hd :: tl ->
+                    let
+                        flexiCounter =
+                            if (isEndOfReferencePeriod hd) then
+                                5
+                            else
+                                0
+                    in
+                        if (isWeekend hd) then
+                            calculateVacationDaysRec workDaysSinceLastFlexi tl <| (leaveDay hd Weekend) :: vacationDays
+                        else if (isHoliday hd) then
+                            calculateVacationDaysRec workDaysSinceLastFlexi tl <| (leaveDay hd Holiday) :: vacationDays
+                        else if workDaysSinceLastFlexi == workDaysBetweenFlexi then
+                            calculateVacationDaysRec flexiCounter tl <| (leaveDay hd Flexi) :: vacationDays
+                        else
+                            calculateVacationDaysRec (workDaysSinceLastFlexi + 1) tl <| (leaveDay hd Annual) :: vacationDays
     in
-        List.map (\d -> leaveDay d Flexi) dates
+        List.reverse (calculateVacationDaysRec 5 dates [])
+
+
+usageStatistics : List LeaveDay -> Usage
+usageStatistics vacationDays =
+    let
+        vacationTypes =
+            List.foldl
+                (\elem result ->
+                    let
+                        { date, leaveType } =
+                            elem
+                    in
+                        leaveType :: result
+                )
+                []
+                vacationDays
+
+        countUsageRec : List LeaveType -> Usage -> Usage
+        countUsageRec vacationTypes usage =
+            case vacationTypes of
+                [] ->
+                    usage
+
+                hd :: tl ->
+                    case hd of
+                        Annual ->
+                            countUsageRec tl { usage | annualLeave = usage.annualLeave + 1 }
+
+                        Flexi ->
+                            countUsageRec tl { usage | flexiLeave = usage.flexiLeave + 1 }
+
+                        Weekend ->
+                            countUsageRec tl { usage | weekendLeave = usage.weekendLeave + 1 }
+
+                        Holiday ->
+                            countUsageRec tl { usage | holidayLeave = usage.holidayLeave + 1 }
+    in
+        countUsageRec vacationTypes initUsage
 
 
 view : Model -> Html Msg
 view model =
     div [ class "" ]
         [ div [ class "container" ]
-            [ h1 [] [ text "Flexidays" ]
-            , viewDatePicker "Start" model.startDatePickerState model.startDateValue
-            , viewDatePicker "End" model.endDatePickerState model.endDateValue
-            , viewVacationDays model.vacationDays
+            [ div [ class "row" ]
+                [ h1 [] [ text "Flexidays" ] ]
+            , div [ class "row" ]
+                [ viewDatePicker "Start" model.startDatePickerState model.startDateValue
+                , viewDatePicker "End" model.endDatePickerState model.endDateValue
+                ]
+            , div [ class "row" ]
+                [ viewUsage model.usage
+                , viewVacationDays model.vacationDays
+                ]
             ]
         , viewFooter model.date
         ]
@@ -238,19 +339,23 @@ view model =
 
 viewVacationDays : List LeaveDay -> Html Msg
 viewVacationDays vacationDays =
-    div [ class "" ]
-        [ case vacationDays of
-            [] ->
-                text "Select start and end dates"
-
-            _ ->
-                table [] <|
-                    [ tr []
-                        [ th [] [ text "Date" ]
-                        , th [] [ text "Type" ]
-                        ]
+    div [ class "col-sm" ]
+        [ h3 [] [ text "Dates" ]
+        , table [ class "table table-striped" ]
+            [ thead []
+                [ tr []
+                    [ th [] [ text "Date" ]
+                    , th [] [ text "Type" ]
                     ]
-                        ++ List.map viewLeaveDay vacationDays
+                ]
+            , (case vacationDays of
+                [] ->
+                    text ""
+
+                _ ->
+                    tbody [] <| List.map viewLeaveDay vacationDays
+              )
+            ]
         ]
 
 
@@ -259,6 +364,49 @@ viewLeaveDay leaveDay =
     tr []
         [ td [] [ text <| (Date.toISO8601 leaveDay.date) ]
         , td [] [ text <| (toString leaveDay.leaveType) ]
+        ]
+
+
+viewUsage : Usage -> Html Msg
+viewUsage usage =
+    div [ class "col-sm" ]
+        [ h3 [] [ text "Usage" ]
+        , table [ class "table table-striped" ]
+            [ thead []
+                [ tr []
+                    [ th []
+                        [ text "Type" ]
+                    , th []
+                        [ text "Usage" ]
+                    ]
+                ]
+            , tbody []
+                [ tr []
+                    [ td []
+                        [ text "Annual" ]
+                    , td []
+                        [ text <| toString usage.annualLeave ]
+                    ]
+                , tr []
+                    [ td []
+                        [ text "Flexi" ]
+                    , td []
+                        [ text <| toString usage.flexiLeave ]
+                    ]
+                , tr []
+                    [ td []
+                        [ text "Weekend" ]
+                    , td []
+                        [ text <| toString usage.weekendLeave ]
+                    ]
+                , tr []
+                    [ td []
+                        [ text "Holiday" ]
+                    , td []
+                        [ text <| toString usage.holidayLeave ]
+                    ]
+                ]
+            ]
         ]
 
 
@@ -285,18 +433,20 @@ viewDatePicker name state value =
             in
                 { defaultDateConfig | allowYearNavigation = True }
     in
-        form []
-            [ Html.node "style" [] [ Html.text css ]
-            , div [ class "container" ]
-                [ p
-                    []
-                    [ label []
-                        [ text (name ++ "date Picker: ")
-                        , DateTimePicker.datePickerWithConfig
-                            datePickerConfig
-                            []
-                            state
-                            value
+        div [ class "col-sm" ]
+            [ form []
+                [ Html.node "style" [] [ Html.text css ]
+                , div [ class "container" ]
+                    [ p
+                        []
+                        [ label []
+                            [ text (name ++ " date picker: ")
+                            , DateTimePicker.datePickerWithConfig
+                                datePickerConfig
+                                []
+                                state
+                                value
+                            ]
                         ]
                     ]
                 ]
@@ -335,8 +485,53 @@ subscriptions model =
     Sub.none
 
 
-estecHolidays : List Date.Date
-estecHolidays =
+isWeekend : Date.Date -> Bool
+isWeekend date =
+    case Date.weekday date of
+        Date.Sat ->
+            True
+
+        Date.Sun ->
+            True
+
+        _ ->
+            False
+
+
+isHoliday : Date.Date -> Bool
+isHoliday date =
+    List.member date holidays
+
+
+isEndOfReferencePeriod : Date.Date -> Bool
+isEndOfReferencePeriod date =
+    let
+        dates =
+            [ ( 31, 3 )
+            , ( 30, 5 )
+            , ( 30, 9 )
+            , ( 31, 12 )
+            ]
+
+        ( year, month, day ) =
+            Date.toTuple date
+    in
+        List.member ( day, month ) dates
+
+
+holidays : List Date.Date
+holidays =
+    estecHolidays2017 ++ estecHolidays2018
+
+
+estecHolidays2018 : List Date.Date
+estecHolidays2018 =
+    [ Date.date 2018 1 1
+    ]
+
+
+estecHolidays2017 : List Date.Date
+estecHolidays2017 =
     [ Date.date 2017 12 24
     , Date.date 2017 12 25
     , Date.date 2017 12 26
@@ -347,16 +542,3 @@ estecHolidays =
     , Date.date 2017 12 31
     , Date.date 2018 1 1
     ]
-
-
-type Workday
-    = Mon
-    | Tue
-    | Wed
-    | Thu
-    | Fri
-
-
-type Weekend
-    = Sat
-    | Sun
