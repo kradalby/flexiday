@@ -269,13 +269,33 @@ calculateVacationDays startDate endDate =
                                 0
                     in
                         if (isWeekend hd) then
-                            calculateVacationDaysRec workDaysSinceLastFlexi tl <| (leaveDay hd Weekend) :: vacationDays
+                            calculateVacationDaysRec
+                                workDaysSinceLastFlexi
+                                tl
+                            <|
+                                (leaveDay hd Weekend)
+                                    :: vacationDays
                         else if (isHoliday hd) then
-                            calculateVacationDaysRec workDaysSinceLastFlexi tl <| (leaveDay hd Holiday) :: vacationDays
+                            calculateVacationDaysRec
+                                workDaysSinceLastFlexi
+                                tl
+                            <|
+                                (leaveDay hd Holiday)
+                                    :: vacationDays
                         else if workDaysSinceLastFlexi == workDaysBetweenFlexi then
-                            calculateVacationDaysRec flexiCounter tl <| (leaveDay hd Flexi) :: vacationDays
+                            calculateVacationDaysRec
+                                flexiCounter
+                                tl
+                            <|
+                                (leaveDay hd Flexi)
+                                    :: vacationDays
                         else
-                            calculateVacationDaysRec (workDaysSinceLastFlexi + 1) tl <| (leaveDay hd Annual) :: vacationDays
+                            calculateVacationDaysRec
+                                (workDaysSinceLastFlexi + 1)
+                                tl
+                            <|
+                                (leaveDay hd Annual)
+                                    :: vacationDays
     in
         List.reverse (calculateVacationDaysRec 5 dates [])
 
@@ -458,7 +478,10 @@ viewFooter d =
     footer [ class "footer" ]
         [ div [ class "container" ]
             [ div [ class "row" ]
-                [ div [ class "col-sm text-muted" ] [ text "Made with ", a [ href "http://elm-lang.org" ] [ text "Elm" ] ]
+                [ div [ class "col-sm text-muted" ]
+                    [ text "Made with "
+                    , a [ href "http://elm-lang.org" ] [ text "Elm" ]
+                    ]
                 , div [ class "col-sm text-muted " ]
                     [ text
                         ("Copyright "
