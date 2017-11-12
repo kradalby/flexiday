@@ -2,6 +2,9 @@ module Main exposing (..)
 
 import Css
 import Date as StdDate
+import Date.Extra.Config.Config_en_us exposing (config)
+import Date.Extra.Format
+import DateParser
 import Html exposing (..)
 import Html.Events exposing (..)
 import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for, href)
@@ -18,18 +21,16 @@ workDaysBetweenFlexi =
     5
 
 
+customDatePattern : String
+customDatePattern =
+    "%Y-%m-%d"
 
--- i18n : DateTimePicker.Config.I18n
--- i18n =
---     { defaultDateI18n
---         | inputFormat = "%d/%m/%Y"
---     }
--- dateTimePickerConfig =
---     { defaultDatePickerConfig
---         | firstDayOfWeek = Mon
---         , allowYearNavigation = True
---         , i18n = i18n
---     }
+
+customInputFormat : DateTimePicker.Config.InputFormat
+customInputFormat =
+    { inputFormatter = Date.Extra.Format.format config customDatePattern
+    , inputParser = DateParser.parse config customDatePattern >> Result.toMaybe
+    }
 
 
 main : Program Never Model Msg
@@ -444,14 +445,14 @@ viewDatePicker name state value =
                             "Start" ->
                                 StartDateChanged
 
-                            "End" ->
-                                EndDateChanged
-
                             _ ->
-                                StartDateChanged
+                                EndDateChanged
                         )
             in
-                { defaultDateConfig | allowYearNavigation = True }
+                { defaultDateConfig
+                    | allowYearNavigation = True
+                    , i18n = { defaultDateI18n | inputFormat = customInputFormat }
+                }
     in
         div [ class "col-sm" ]
             [ form []
