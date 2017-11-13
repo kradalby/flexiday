@@ -551,6 +551,17 @@ holidays =
 estecHolidays2018 : List Date.Date
 estecHolidays2018 =
     [ Date.date 2018 1 1
+    , Date.date 2018 3 30
+    , Date.date 2018 4 2
+    , Date.date 2018 4 27
+    , Date.date 2018 5 10
+    , Date.date 2018 5 21
+    , Date.date 2018 12 24
+    , Date.date 2018 12 25
+    , Date.date 2018 12 26
+    , Date.date 2018 12 27
+    , Date.date 2018 12 28
+    , Date.date 2018 12 31
     ]
 
 
