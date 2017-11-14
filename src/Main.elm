@@ -267,32 +267,32 @@ calculateVacationDays startDate endDate =
                             if (isEndOfReferencePeriod hd) then
                                 5
                             else
-                                0
+                                workDaysSinceLastFlexi
                     in
                         if (isWeekend hd) then
                             calculateVacationDaysRec
-                                workDaysSinceLastFlexi
+                                flexiCounter
                                 tl
                             <|
                                 (leaveDay hd Weekend)
                                     :: vacationDays
                         else if (isHoliday hd) then
                             calculateVacationDaysRec
-                                workDaysSinceLastFlexi
+                                flexiCounter
                                 tl
                             <|
                                 (leaveDay hd Holiday)
                                     :: vacationDays
                         else if workDaysSinceLastFlexi == workDaysBetweenFlexi then
                             calculateVacationDaysRec
-                                flexiCounter
+                                0
                                 tl
                             <|
                                 (leaveDay hd Flexi)
                                     :: vacationDays
                         else
                             calculateVacationDaysRec
-                                (workDaysSinceLastFlexi + 1)
+                                (flexiCounter + 1)
                                 tl
                             <|
                                 (leaveDay hd Annual)
