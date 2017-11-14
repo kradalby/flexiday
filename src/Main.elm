@@ -61,6 +61,7 @@ type alias Usage =
     , flexiLeave : Int
     , weekendLeave : Int
     , holidayLeave : Int
+    , total: Int
     }
 
 
@@ -70,6 +71,7 @@ initUsage =
     , flexiLeave = 0
     , weekendLeave = 0
     , holidayLeave = 0
+    , total = 0
     }
 
 
@@ -335,8 +337,10 @@ usageStatistics vacationDays =
 
                         Holiday ->
                             countUsageRec tl { usage | holidayLeave = usage.holidayLeave + 1 }
+
+        usageWithTotal = { initUsage | total = List.length vacationDays }
     in
-        countUsageRec vacationTypes initUsage
+        countUsageRec vacationTypes usageWithTotal
 
 
 view : Model -> Html Msg
@@ -425,6 +429,12 @@ viewUsage usage =
                         [ text "Holiday" ]
                     , td []
                         [ text <| toString usage.holidayLeave ]
+                    ]
+                , tr [class "table-dark"]
+                    [ td []
+                        [ strong [] [text "Total"] ]
+                    , td []
+                        [ strong [] [text <| toString usage.total] ]
                     ]
                 ]
             ]
