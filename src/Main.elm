@@ -65,6 +65,11 @@ type alias Usage =
     }
 
 
+type ViewMode
+    = Calendar
+    | Table
+
+
 initUsage : Usage
 initUsage =
     { annualLeave = 0
@@ -83,6 +88,7 @@ type alias Model =
     , endDatePickerState : DateTimePicker.State
     , vacationDays : List LeaveDay
     , usage : Usage
+    , viewMode : ViewMode
     }
 
 
@@ -95,6 +101,7 @@ init =
       , endDatePickerState = DateTimePicker.initialState
       , vacationDays = []
       , usage = initUsage
+      , viewMode = Table
       }
     , Cmd.batch
         [ DateTimePicker.initialCmd StartDateChanged DateTimePicker.initialState
@@ -110,6 +117,7 @@ type Msg
     | StartDateChanged DateTimePicker.State (Maybe StdDate.Date)
     | EndDateChanged DateTimePicker.State (Maybe StdDate.Date)
     | ComputeVacationDays
+    | ChangeViewMode ViewMode
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -146,6 +154,13 @@ update msg model =
                   }
                 , Cmd.none
                 )
+
+        ChangeViewMode mode ->
+            ( { model
+                | viewMode = mode
+              }
+            , Cmd.none
+            )
 
 
 onEnter : Msg -> Attribute Msg
@@ -198,6 +213,31 @@ elmMonthToInt month =
 
         StdDate.Dec ->
             12
+
+
+dayOfWeekAsIndex : Date.Date -> Int
+dayOfWeekAsIndex day =
+    case (Date.weekday day) of
+        Date.Mon ->
+            0
+
+        Date.Tue ->
+            1
+
+        Date.Wed ->
+            2
+
+        Date.Thu ->
+            3
+
+        Date.Fri ->
+            4
+
+        Date.Sat ->
+            5
+
+        Date.Sun ->
+            6
 
 
 elmDateToTimeDate : StdDate.Date -> Date.Date
@@ -347,25 +387,20 @@ usageStatistics vacationDays =
 view : Model -> Html Msg
 view model =
     div [ class "" ]
-        [ viewNav
+        [ viewNav model.viewMode
         , viewMain model
         , viewFooter model.date
         ]
 
 
-viewNav : Html Msg
-viewNav =
+viewNav : ViewMode -> Html Msg
+viewNav mode =
     header []
         [ nav [ class "navbar navbar-expand-md navbar-dark bg-dark " ]
             [ a [ class "navbar-brand flexiday-logo", href "#" ]
                 [ text "" ]
-            , button [ attribute "aria-controls" "navbarsExampleDefault", attribute "aria-expanded" "false", attribute "aria-label" "Toggle navigation", class "navbar-toggler", attribute "data-target" "#navbarsExampleDefault", attribute "data-toggle" "collapse", type_ "button" ]
-                [ span [ class "navbar-toggler-icon" ]
-                    []
-                ]
-            , div [ class "collapse navbar-collapse" ]
-                [ ul [ class "navbar-nav mr-auto" ]
-                    []
+            , div [ class " ml-auto" ]
+                [ viewModeSwitch mode
                 ]
             ]
         ]
@@ -379,7 +414,13 @@ viewMain model =
             , viewDatePicker "end" model.endDatePickerState model.endDateValue
             ]
         , div [ class "row mt-3" ]
-            [ viewVacationDaysTable model.vacationDays
+            [ (case model.viewMode of
+                Calendar ->
+                    viewVacationDaysCalendar model.vacationDays
+
+                Table ->
+                    viewVacationDaysTable model.vacationDays
+              )
             , viewUsage model.usage
             ]
         ]
@@ -415,11 +456,139 @@ viewFooter d =
         ]
 
 
+viewModeSwitch : ViewMode -> Html Msg
+viewModeSwitch currentMode =
+    div [ class "btn-group", attribute "data-toggle" "buttons" ]
+        [ label
+            [ class
+                (case currentMode of
+                    Table ->
+                        "btn btn-secondary active"
+
+                    Calendar ->
+                        "btn btn-secondary"
+                )
+            , onClick (ChangeViewMode Table)
+            ]
+            [ input [ type_ "radio", name "mode", attribute "autocomplete" "off", id "option2" ] []
+            , text "Table"
+            ]
+        , label
+            [ class
+                (case currentMode of
+                    Calendar ->
+                        "btn btn-secondary active"
+
+                    Table ->
+                        "btn btn-secondary"
+                )
+            , onClick (ChangeViewMode Calendar)
+            ]
+            [ input [ type_ "radio", name "mode", attribute "autocomplete" "off", id "option1" ] []
+            , text "Calendar"
+            ]
+        ]
+
+
+viewVacationDaysCalendar : List LeaveDay -> Html Msg
+viewVacationDaysCalendar vacationDays =
+    let
+        padWeekStart day =
+            List.repeat (dayOfWeekAsIndex day.date) viewEmptyCalendar
+
+        padWeekEnd day =
+            List.repeat (abs ((dayOfWeekAsIndex day.date) - 6)) viewEmptyCalendar
+
+        cards vacationDays results =
+            case vacationDays of
+                [] ->
+                    results
+
+                hd :: [ rest ] ->
+                    cards [] <| results ++ [ (viewLeaveDayCalendar hd), (viewLeaveDayCalendar rest) ] ++ (padWeekEnd rest)
+
+                hd :: tl ->
+                    case results of
+                        [] ->
+                            cards tl <| (padWeekStart hd) ++ [ (viewLeaveDayCalendar hd) ]
+
+                        _ ->
+                            cards tl <| results ++ [ (viewLeaveDayCalendar hd) ]
+
+        rows vacationDaysCalendar results =
+            let
+                hd =
+                    List.take 7 vacationDaysCalendar
+
+                tl =
+                    List.drop 7 vacationDaysCalendar
+            in
+                case ((Debug.log "length" <| List.length vacationDaysCalendar) % 7) of
+                    0 ->
+                        case vacationDaysCalendar of
+                            [] ->
+                                results
+
+                            _ ->
+                                rows tl <| results ++ [ div [ class "row" ] hd ]
+
+                    _ ->
+                        results
+    in
+        div [ class "col-sm-8 col-8" ]
+            [ h2 [] [ text "Dates" ]
+            , div [ class "alert alert-info" ]
+                [ strong [] [ text "NB! " ]
+                , text "The calender mode us currently not very optimal, works ish ok on a big screen"
+                ]
+            , div [ class "" ]
+                [ div [ class "row" ]
+                    (rows
+                        (cards
+                            vacationDays
+                            []
+                        )
+                        []
+                    )
+                ]
+            ]
+
+
+viewLeaveDayCalendar : LeaveDay -> Html Msg
+viewLeaveDayCalendar day =
+    div [ class "card", Html.Attributes.style [ ( "min-width", "125px" ) ] ]
+        [ div [ class "card-header" ]
+            [ text <| Date.toISO8601 day.date
+            ]
+        , div [ class "card-body" ]
+            [ text <| toString <| Date.weekday day.date
+            ]
+        , div [ class "card-footer" ]
+            [ text <| toString day.leaveType
+            ]
+        ]
+
+
+viewEmptyCalendar : Html Msg
+viewEmptyCalendar =
+    div [ class "card bg-dark", Html.Attributes.style [ ( "min-width", "125px" ) ] ]
+        [ div [ class "card-header" ]
+            [ text "Work"
+            ]
+        , div [ class "card-body" ]
+            [ text "Work"
+            ]
+        , div [ class "card-footer" ]
+            [ text "Work"
+            ]
+        ]
+
+
 viewVacationDaysTable : List LeaveDay -> Html Msg
 viewVacationDaysTable vacationDays =
     div [ class "col-sm-8 col-8" ]
         [ h2 [] [ text "Dates" ]
-        , table [ class "table table-striped" ]
+        , table [ class "table table-striped table-bordered" ]
             [ thead []
                 [ tr []
                     [ th [] [ text "Date" ]
@@ -440,8 +609,8 @@ viewVacationDaysTable vacationDays =
 viewLeaveDayTable : LeaveDay -> Html Msg
 viewLeaveDayTable leaveDay =
     tr []
-        [ td [] [ text <| (Date.toISO8601 leaveDay.date) ]
-        , td [] [ text <| (toString leaveDay.leaveType) ]
+        [ td [] [ text <| Date.toISO8601 leaveDay.date ]
+        , td [] [ text <| toString leaveDay.leaveType ]
         ]
 
 
@@ -449,7 +618,7 @@ viewUsage : Usage -> Html Msg
 viewUsage usage =
     div [ class "col-sm-4 col-4" ]
         [ h2 [] [ text "Usage" ]
-        , table [ class "table table-striped" ]
+        , table [ class "table table-striped table-bordered" ]
             [ thead []
                 [ tr []
                     [ th []
