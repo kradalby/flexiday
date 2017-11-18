@@ -357,8 +357,8 @@ viewNav : Html Msg
 viewNav =
     header []
         [ nav [ class "navbar navbar-expand-md navbar-dark bg-dark " ]
-            [ a [ class "navbar-brand", href "#" ]
-                [ text "Flexiday" ]
+            [ a [ class "navbar-brand flexiday-logo", href "#" ]
+                [ text "" ]
             , button [ attribute "aria-controls" "navbarsExampleDefault", attribute "aria-expanded" "false", attribute "aria-label" "Toggle navigation", class "navbar-toggler", attribute "data-target" "#navbarsExampleDefault", attribute "data-toggle" "collapse", type_ "button" ]
                 [ span [ class "navbar-toggler-icon" ]
                     []
@@ -379,7 +379,7 @@ viewMain model =
             , viewDatePicker "end" model.endDatePickerState model.endDateValue
             ]
         , div [ class "row mt-3" ]
-            [ viewVacationDays model.vacationDays
+            [ viewVacationDaysTable model.vacationDays
             , viewUsage model.usage
             ]
         ]
@@ -415,9 +415,9 @@ viewFooter d =
         ]
 
 
-viewVacationDays : List LeaveDay -> Html Msg
-viewVacationDays vacationDays =
-    div [ class "col-sm-8" ]
+viewVacationDaysTable : List LeaveDay -> Html Msg
+viewVacationDaysTable vacationDays =
+    div [ class "col-sm-8 col-8" ]
         [ h2 [] [ text "Dates" ]
         , table [ class "table table-striped" ]
             [ thead []
@@ -431,14 +431,14 @@ viewVacationDays vacationDays =
                     text ""
 
                 _ ->
-                    tbody [] <| List.map viewLeaveDay vacationDays
+                    tbody [] <| List.map viewLeaveDayTable vacationDays
               )
             ]
         ]
 
 
-viewLeaveDay : LeaveDay -> Html Msg
-viewLeaveDay leaveDay =
+viewLeaveDayTable : LeaveDay -> Html Msg
+viewLeaveDayTable leaveDay =
     tr []
         [ td [] [ text <| (Date.toISO8601 leaveDay.date) ]
         , td [] [ text <| (toString leaveDay.leaveType) ]
@@ -447,7 +447,7 @@ viewLeaveDay leaveDay =
 
 viewUsage : Usage -> Html Msg
 viewUsage usage =
-    div [ class "col-sm-4" ]
+    div [ class "col-sm-4 col-4" ]
         [ h2 [] [ text "Usage" ]
         , table [ class "table table-striped" ]
             [ thead []
