@@ -7,7 +7,7 @@ import Date.Extra.Format
 import DateParser
 import Html exposing (..)
 import Html.Events exposing (..)
-import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for, href)
+import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for, href, attribute)
 import Json.Decode exposing (Decoder, int, string, list)
 import Task
 import Time.Date as Date
@@ -61,7 +61,7 @@ type alias Usage =
     , flexiLeave : Int
     , weekendLeave : Int
     , holidayLeave : Int
-    , total: Int
+    , total : Int
     }
 
 
@@ -338,7 +338,8 @@ usageStatistics vacationDays =
                         Holiday ->
                             countUsageRec tl { usage | holidayLeave = usage.holidayLeave + 1 }
 
-        usageWithTotal = { initUsage | total = List.length vacationDays }
+        usageWithTotal =
+            { initUsage | total = List.length vacationDays }
     in
         countUsageRec vacationTypes usageWithTotal
 
@@ -346,26 +347,78 @@ usageStatistics vacationDays =
 view : Model -> Html Msg
 view model =
     div [ class "" ]
-        [ div [ class "container" ]
-            [ div [ class "row" ]
-                [ h1 [] [ text "Flexidays" ] ]
-            , div [ class "row" ]
-                [ viewDatePicker "Start" model.startDatePickerState model.startDateValue
-                , viewDatePicker "End" model.endDatePickerState model.endDateValue
+        [ viewNav
+        , viewMain model
+        , viewFooter model.date
+        ]
+
+
+viewNav : Html Msg
+viewNav =
+    header []
+        [ nav [ class "navbar navbar-expand-md navbar-dark bg-dark " ]
+            [ a [ class "navbar-brand", href "#" ]
+                [ text "Flexiday" ]
+            , button [ attribute "aria-controls" "navbarsExampleDefault", attribute "aria-expanded" "false", attribute "aria-label" "Toggle navigation", class "navbar-toggler", attribute "data-target" "#navbarsExampleDefault", attribute "data-toggle" "collapse", type_ "button" ]
+                [ span [ class "navbar-toggler-icon" ]
+                    []
                 ]
-            , div [ class "row" ]
-                [ viewUsage model.usage
-                , viewVacationDays model.vacationDays
+            , div [ class "collapse navbar-collapse" ]
+                [ ul [ class "navbar-nav mr-auto" ]
+                    []
                 ]
             ]
-        , viewFooter model.date
+        ]
+
+
+viewMain : Model -> Html Msg
+viewMain model =
+    main_ [ class "container-fluid", attribute "role" "main" ]
+        [ div [ class "row mt-3" ]
+            [ viewDatePicker "start" model.startDatePickerState model.startDateValue
+            , viewDatePicker "end" model.endDatePickerState model.endDateValue
+            ]
+        , div [ class "row mt-3" ]
+            [ viewVacationDays model.vacationDays
+            , viewUsage model.usage
+            ]
+        ]
+
+
+viewFooter : Maybe StdDate.Date -> Html Msg
+viewFooter d =
+    footer [ class "footer" ]
+        [ div [ class "container-fluid" ]
+            [ div [ class "row" ]
+                [ div [ class "col-sm text-muted" ]
+                    [ text "Made with "
+                    , a [ href "http://elm-lang.org" ] [ text "Elm" ]
+                    ]
+                , div [ class "col-sm text-muted " ]
+                    [ text
+                        ("Copyright "
+                            ++ (toString
+                                    (case d of
+                                        Nothing ->
+                                            1337
+
+                                        Just date ->
+                                            StdDate.year date
+                                    )
+                               )
+                            ++ " "
+                        )
+                    , a [ href "https://kradalby.no" ] [ text " Kristoffer Dalby" ]
+                    ]
+                ]
+            ]
         ]
 
 
 viewVacationDays : List LeaveDay -> Html Msg
 viewVacationDays vacationDays =
-    div [ class "col-sm" ]
-        [ h3 [] [ text "Dates" ]
+    div [ class "col-sm-8" ]
+        [ h2 [] [ text "Dates" ]
         , table [ class "table table-striped" ]
             [ thead []
                 [ tr []
@@ -394,8 +447,8 @@ viewLeaveDay leaveDay =
 
 viewUsage : Usage -> Html Msg
 viewUsage usage =
-    div [ class "col-sm" ]
-        [ h3 [] [ text "Usage" ]
+    div [ class "col-sm-4" ]
+        [ h2 [] [ text "Usage" ]
         , table [ class "table table-striped" ]
             [ thead []
                 [ tr []
@@ -430,11 +483,11 @@ viewUsage usage =
                     , td []
                         [ text <| toString usage.holidayLeave ]
                     ]
-                , tr [class "table-dark"]
+                , tr [ class "table-dark" ]
                     [ td []
-                        [ strong [] [text "Total"] ]
+                        [ strong [] [ text "Total" ] ]
                     , td []
-                        [ strong [] [text <| toString usage.total] ]
+                        [ strong [] [ text <| toString usage.total ] ]
                     ]
                 ]
             ]
@@ -452,7 +505,7 @@ viewDatePicker name state value =
                 defaultDateConfig =
                     defaultDatePickerConfig
                         (case name of
-                            "Start" ->
+                            "start" ->
                                 StartDateChanged
 
                             _ ->
@@ -465,53 +518,18 @@ viewDatePicker name state value =
                 }
     in
         div [ class "col-sm" ]
-            [ form []
+            [ h2 [] [ text ("Vacation " ++ name) ]
+            , form []
                 [ Html.node "style" [] [ Html.text css ]
-                , div [ class "container" ]
-                    [ p
-                        []
-                        [ label []
-                            [ text (name ++ " date picker: ")
-                            , DateTimePicker.datePickerWithConfig
-                                datePickerConfig
-                                []
-                                state
-                                value
-                            ]
-                        ]
+                , div []
+                    [ DateTimePicker.datePickerWithConfig
+                        datePickerConfig
+                        [ class "form-control" ]
+                        state
+                        value
                     ]
                 ]
             ]
-
-
-viewFooter : Maybe StdDate.Date -> Html Msg
-viewFooter d =
-    footer [ class "footer" ]
-        [ div [ class "container" ]
-            [ div [ class "row" ]
-                [ div [ class "col-sm text-muted" ]
-                    [ text "Made with "
-                    , a [ href "http://elm-lang.org" ] [ text "Elm" ]
-                    ]
-                , div [ class "col-sm text-muted " ]
-                    [ text
-                        ("Copyright "
-                            ++ (toString
-                                    (case d of
-                                        Nothing ->
-                                            1337
-
-                                        Just date ->
-                                            StdDate.year date
-                                    )
-                               )
-                            ++ " "
-                        )
-                    , a [ href "https://kradalby.no" ] [ text " Kristoffer Dalby" ]
-                    ]
-                ]
-            ]
-        ]
 
 
 subscriptions : Model -> Sub Msg
