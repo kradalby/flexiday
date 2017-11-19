@@ -399,7 +399,7 @@ viewNav mode =
         [ nav [ class "navbar navbar-expand-md navbar-dark bg-dark " ]
             [ a [ class "navbar-brand flexiday-logo", href "#" ]
                 [ text "" ]
-            , div [ class " ml-auto" ]
+            , div [ class "ml-auto d-none d-xl-block" ]
                 [ viewModeSwitch mode
                 ]
             ]
@@ -693,7 +693,7 @@ viewDatePicker name state value =
                 , div []
                     [ DateTimePicker.datePickerWithConfig
                         datePickerConfig
-                        [ class "form-control", attribute "readonly" "true" ]
+                        [ class "form-control", attribute "readonly" "true", type_ "date", attribute "min" "2017-01-01" ]
                         state
                         value
                     ]
