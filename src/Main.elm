@@ -409,7 +409,7 @@ viewNav mode =
 viewMain : Model -> Html Msg
 viewMain model =
     main_ [ class "container-fluid", attribute "role" "main" ]
-        [ div [ class "row mt-3" ]
+        [ div [ class "row" ]
             [ viewDatePicker "start" model.startDatePickerState model.startDateValue
             , viewDatePicker "end" model.endDatePickerState model.endDateValue
             ]
@@ -686,7 +686,7 @@ viewDatePicker name state value =
                     , i18n = { defaultDateI18n | inputFormat = customInputFormat }
                 }
     in
-        div [ class "col-sm" ]
+        div [ class "col-sm mt-3" ]
             [ h2 [] [ text ("Vacation " ++ name) ]
             , form []
                 [ Html.node "style" [] [ Html.text css ]
