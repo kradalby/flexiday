@@ -463,10 +463,10 @@ viewModeSwitch currentMode =
             [ class
                 (case currentMode of
                     Table ->
-                        "btn btn-secondary active"
+                        "btn btn-secondary btn-sm active"
 
                     Calendar ->
-                        "btn btn-secondary"
+                        "btn btn-secondary btn-sm"
                 )
             , onClick (ChangeViewMode Table)
             ]
@@ -477,10 +477,10 @@ viewModeSwitch currentMode =
             [ class
                 (case currentMode of
                     Calendar ->
-                        "btn btn-secondary active"
+                        "btn btn-secondary btn-sm active"
 
                     Table ->
-                        "btn btn-secondary"
+                        "btn btn-secondary btn-sm"
                 )
             , onClick (ChangeViewMode Calendar)
             ]
@@ -535,11 +535,11 @@ viewVacationDaysCalendar vacationDays =
                     _ ->
                         results
     in
-        div [ class "col-sm-8 col-8" ]
+        div [ class "col-sm-8" ]
             [ h2 [] [ text "Dates" ]
             , div [ class "alert alert-info" ]
                 [ strong [] [ text "NB! " ]
-                , text "The calender mode us currently not very optimal, works ish ok on a big screen"
+                , text "Calendar mode is currently not very good, works ish ok on a big screen"
                 ]
             , div [ class "" ]
                 [ div [ class "row" ]
@@ -586,7 +586,7 @@ viewEmptyCalendar =
 
 viewVacationDaysTable : List LeaveDay -> Html Msg
 viewVacationDaysTable vacationDays =
-    div [ class "col-sm-8 col-8" ]
+    div [ class "col-sm-8" ]
         [ h2 [] [ text "Dates" ]
         , table [ class "table table-striped table-bordered" ]
             [ thead []
@@ -616,7 +616,7 @@ viewLeaveDayTable leaveDay =
 
 viewUsage : Usage -> Html Msg
 viewUsage usage =
-    div [ class "col-sm-4 col-4" ]
+    div [ class "col-sm-4" ]
         [ h2 [] [ text "Usage" ]
         , table [ class "table table-striped table-bordered" ]
             [ thead []
@@ -693,7 +693,7 @@ viewDatePicker name state value =
                 , div []
                     [ DateTimePicker.datePickerWithConfig
                         datePickerConfig
-                        [ class "form-control" ]
+                        [ class "form-control", attribute "readonly" "true" ]
                         state
                         value
                     ]
