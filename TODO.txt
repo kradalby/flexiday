@@ -1,0 +1,5 @@
+# TODO
+
+- Warning message when user enters end date before start date
+- Monday as start of week
+- Consistent date format
