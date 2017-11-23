@@ -1,5 +1,6 @@
 # TODO
 
 - Warning message when user enters end date before start date
-- Monday as start of week
-- Consistent date format
+- ~Monday as start of week~
+- ~Consistent date format~
+- Meta data and files for app on homescreen
