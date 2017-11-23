@@ -23,7 +23,7 @@ workDaysBetweenFlexi =
 
 customDatePattern : String
 customDatePattern =
-    "%Y-%m-%d"
+    "%d-%m-%Y"
 
 
 customInputFormat : DateTimePicker.Config.InputFormat
@@ -558,7 +558,7 @@ viewLeaveDayCalendar : LeaveDay -> Html Msg
 viewLeaveDayCalendar day =
     div [ class "card", Html.Attributes.style [ ( "min-width", "125px" ) ] ]
         [ div [ class "card-header" ]
-            [ text <| Date.toISO8601 day.date
+            [ text <| (padded (Date.day day.date) ++ "-" ++ padded (Date.month day.date) ++ "-" ++ toString (Date.year day.date))
             ]
         , div [ class "card-body" ]
             [ text <| toString <| Date.weekday day.date
@@ -609,7 +609,7 @@ viewVacationDaysTable vacationDays =
 viewLeaveDayTable : LeaveDay -> Html Msg
 viewLeaveDayTable leaveDay =
     tr []
-        [ td [] [ text <| Date.toISO8601 leaveDay.date ]
+        [ td [] [ text <| (padded (Date.day leaveDay.date) ++ "-" ++ padded (Date.month leaveDay.date) ++ "-" ++ toString (Date.year leaveDay.date)) ]
         , td [] [ text <| toString leaveDay.leaveType ]
         ]
 
@@ -683,6 +683,7 @@ viewDatePicker name state value =
             in
                 { defaultDateConfig
                     | allowYearNavigation = True
+                    , firstDayOfWeek = StdDate.Mon
                     , i18n = { defaultDateI18n | inputFormat = customInputFormat }
                 }
     in
@@ -693,7 +694,7 @@ viewDatePicker name state value =
                 , div []
                     [ DateTimePicker.datePickerWithConfig
                         datePickerConfig
-                        [ class "form-control", attribute "readonly" "true", type_ "date", attribute "min" "2017-01-01" ]
+                        [ class "form-control", attribute "min" "2017-01-01" ]
                         state
                         value
                     ]
@@ -774,3 +775,11 @@ estecHolidays2017 =
     , Date.date 2017 12 31
     , Date.date 2018 1 1
     ]
+
+
+padded : Int -> String
+padded n =
+    if n < 10 then
+        "0" ++ toString n
+    else
+        toString n
