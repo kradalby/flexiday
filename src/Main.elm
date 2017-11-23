@@ -7,8 +7,9 @@ import Date.Extra.Format
 import DateParser
 import Html exposing (..)
 import Html.Events exposing (..)
-import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for, href, attribute)
+import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for, href, attribute, property)
 import Json.Decode exposing (Decoder, int, string, list)
+import Json.Encode
 import Task
 import Time.Date as Date
 import DateTimePicker
@@ -80,6 +81,34 @@ initUsage =
     }
 
 
+type AlertColor
+    = Primary
+    | Secondary
+    | Success
+    | Danger
+    | Warning
+    | Info
+    | Light
+    | Dark
+
+
+type alias Alert =
+    { message : List (Html Msg)
+    , color : AlertColor
+    , onClick : Maybe Msg
+    , dismissible : Bool
+    }
+
+
+openingAlert : Alert
+openingAlert =
+    { message = [ text "This page is not associated with ESA and is 'best effort' only. If you find a fault in the calculator, please give me a notice." ]
+    , color = Info
+    , onClick = Just DeleteAlert
+    , dismissible = True
+    }
+
+
 type alias Model =
     { date : Maybe StdDate.Date
     , startDateValue : Maybe StdDate.Date
@@ -89,6 +118,7 @@ type alias Model =
     , vacationDays : List LeaveDay
     , usage : Usage
     , viewMode : ViewMode
+    , alert : Maybe Alert
     }
 
 
@@ -102,6 +132,7 @@ init =
       , vacationDays = []
       , usage = initUsage
       , viewMode = Table
+      , alert = Just openingAlert
       }
     , Cmd.batch
         [ DateTimePicker.initialCmd StartDateChanged DateTimePicker.initialState
@@ -118,6 +149,8 @@ type Msg
     | EndDateChanged DateTimePicker.State (Maybe StdDate.Date)
     | ComputeVacationDays
     | ChangeViewMode ViewMode
+    | SetAlert Alert
+    | DeleteAlert
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -162,6 +195,20 @@ update msg model =
             , Cmd.none
             )
 
+        SetAlert alert ->
+            ( { model
+                | alert = Just alert
+              }
+            , Cmd.none
+            )
+
+        DeleteAlert ->
+            ( { model
+                | alert = Nothing
+              }
+            , Cmd.none
+            )
+
 
 onEnter : Msg -> Attribute Msg
 onEnter msg =
@@ -173,6 +220,34 @@ onEnter msg =
                 Json.Decode.fail "not ENTER"
     in
         on "keydown" (Json.Decode.andThen isEnter keyCode)
+
+
+alertToBootstrapCSS : AlertColor -> String
+alertToBootstrapCSS alert =
+    case alert of
+        Primary ->
+            "alert alert-primary"
+
+        Secondary ->
+            "alert alert-secondary"
+
+        Success ->
+            "alert alert-success"
+
+        Danger ->
+            "alert alert-danger"
+
+        Warning ->
+            "alert alert-warning"
+
+        Info ->
+            "alert alert-info"
+
+        Light ->
+            "alert alert-light"
+
+        Dark ->
+            "alert alert-dark"
 
 
 elmMonthToInt : StdDate.Month -> Int
@@ -409,7 +484,16 @@ viewNav mode =
 viewMain : Model -> Html Msg
 viewMain model =
     main_ [ class "container-fluid", attribute "role" "main" ]
-        [ div [ class "row" ]
+        [ div [ class "col-sm-12" ]
+            [ (case model.alert of
+                Nothing ->
+                    text ""
+
+                Just alert ->
+                    viewAlert alert
+              )
+            ]
+        , div [ class "row" ]
             [ viewDatePicker "start" model.startDatePickerState model.startDateValue
             , viewDatePicker "end" model.endDatePickerState model.endDateValue
             ]
@@ -537,10 +621,15 @@ viewVacationDaysCalendar vacationDays =
     in
         div [ class "col-sm-8" ]
             [ h2 [] [ text "Dates" ]
-            , div [ class "alert alert-info" ]
-                [ strong [] [ text "NB! " ]
-                , text "Calendar mode is currently not very good, works ish ok on a big screen"
-                ]
+            , viewAlert
+                { message =
+                    [ strong [] [ text "NB! " ]
+                    , text "Calendar mode is currently not very good, works ish ok on a big screen"
+                    ]
+                , color = Info
+                , onClick = Nothing
+                , dismissible = False
+                }
             , div [ class "" ]
                 [ div [ class "row" ]
                     (rows
@@ -700,6 +789,44 @@ viewDatePicker name state value =
                     ]
                 ]
             ]
+
+
+viewAlert : Alert -> Html Msg
+viewAlert alert =
+    let
+        cssClasses =
+            "ml-auto"
+                ++ " "
+                ++ (alertToBootstrapCSS alert.color)
+                ++ " "
+                ++ (case alert.dismissible of
+                        True ->
+                            "alert-dismissible fade show"
+
+                        False ->
+                            ""
+                   )
+
+        attr =
+            case alert.onClick of
+                Nothing ->
+                    [ class cssClasses ]
+
+                Just click ->
+                    [ class cssClasses, onClick click ]
+    in
+        div
+            attr
+        <|
+            alert.message
+                ++ [ (case alert.dismissible of
+                        True ->
+                            button [ type_ "button", class "close" ] [ span [ property "innerHTML" (Json.Encode.string "&times;") ] [] ]
+
+                        False ->
+                            text ""
+                     )
+                   ]
 
 
 subscriptions : Model -> Sub Msg
