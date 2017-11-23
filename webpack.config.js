@@ -48,7 +48,7 @@ module.exports = {
 
   plugins: process.env.NODE_ENV === 'development' ? [] : [
     new CopyWebpackPlugin([
-      // { from: 'src/assets/favicons', to: 'favicons' }
+      { from: 'src/assets/favicons', to: 'favicons' }
     ]),
     new webpack.optimize.UglifyJsPlugin({
       compress: {

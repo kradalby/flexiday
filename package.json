@@ -8,7 +8,9 @@
     "watch": "webpack -w",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --hot --port 8000",
     "dev-pub": "cross-env NODE_ENV=development webpack-dev-server --hot --port 8000 --host 0.0.0.0",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "favicons": "real-favicon generate faviconDescription.json faviconData.json src/assets/favicons",
+    "favicons-inject": "real-favicon inject faviconData.json src/assets/favicons dist/*.html"
   },
   "repository": {
     "type": "git",
@@ -36,5 +38,8 @@
     "webpack": "^3.8.1",
     "webpack-dev-middleware": "^1.12.0",
     "webpack-dev-server": "^2.9.4"
+  },
+  "dependencies": {
+    "cli-real-favicon": "0.0.6"
   }
 }
