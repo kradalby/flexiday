@@ -3,7 +3,7 @@
 - ~Monday as start of week~
 - ~Consistent date format~
 - ~Meta data and files for app on homescreen~
+- ~Warning message when user enters end date before start date~
 
-- Warning message when user enters end date before start date
 - Add other ESA sites
 - Change the input type (date field on small devices, text with selector on big)

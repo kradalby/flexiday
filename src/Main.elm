@@ -180,10 +180,14 @@ update msg model =
             let
                 vacationDays =
                     createVacationDaysList model.startDateValue model.endDateValue
+
+                alert =
+                    alertForSelectedDates model.startDateValue model.endDateValue
             in
                 ( { model
                     | vacationDays = vacationDays
                     , usage = (usageStatistics vacationDays)
+                    , alert = alert
                   }
                 , Cmd.none
                 )
@@ -325,6 +329,32 @@ leaveDay d lt =
     { date = d
     , leaveType = lt
     }
+
+
+alertForSelectedDates : Maybe StdDate.Date -> Maybe StdDate.Date -> Maybe Alert
+alertForSelectedDates startDate endDate =
+    case ( startDate, endDate ) of
+        ( Nothing, Nothing ) ->
+            Nothing
+
+        ( Just start, Nothing ) ->
+            Nothing
+
+        ( Nothing, Just end ) ->
+            Nothing
+
+        ( Just start, Just end ) ->
+            if (Date.compare (elmDateToTimeDate start) (elmDateToTimeDate end)) == LT then
+                Nothing
+            else
+                Just
+                    { message =
+                        [ text "You have selected a start date which is smaller than the end date, this is not going to work :)"
+                        ]
+                    , color = Warning
+                    , onClick = Nothing
+                    , dismissible = False
+                    }
 
 
 createVacationDaysList : Maybe StdDate.Date -> Maybe StdDate.Date -> List LeaveDay
