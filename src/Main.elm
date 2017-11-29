@@ -7,14 +7,15 @@ import Date.Extra.Format
 import DateParser
 import Html exposing (..)
 import Html.Events exposing (..)
-import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for, href, attribute, property, pattern)
-import Json.Decode exposing (Decoder, int, string, list)
+import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for, href, attribute, property, pattern, style)
+import Json.Decode
 import Json.Encode
 import Task
 import Time.Date as Date
 import DateTimePicker
 import DateTimePicker.Config exposing (defaultDatePickerConfig, defaultDateTimePickerConfig, defaultDateI18n)
 import DateTimePicker.Css
+import Holiday
 
 
 workDaysBetweenFlexi : Int
@@ -119,6 +120,8 @@ type alias Model =
     , usage : Usage
     , viewMode : ViewMode
     , alert : Maybe Alert
+    , campus : Holiday.Campus
+    , campusDialog : Bool
     }
 
 
@@ -133,6 +136,8 @@ init =
       , usage = initUsage
       , viewMode = Table
       , alert = Just openingAlert
+      , campus = Holiday.ESTEC
+      , campusDialog = False
       }
     , Cmd.batch
         [ DateTimePicker.initialCmd StartDateChanged DateTimePicker.initialState
@@ -153,6 +158,8 @@ type Msg
     | DeleteAlert
     | UpdateStartDateSmallScreen String
     | UpdateEndDateSmallScreen String
+    | ChangeCampus Holiday.Campus
+    | OpenCampusDialog
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -181,7 +188,7 @@ update msg model =
         ComputeVacationDays ->
             let
                 vacationDays =
-                    createVacationDaysList model.startDateValue model.endDateValue
+                    createVacationDaysList model.campus model.startDateValue model.endDateValue
 
                 alert =
                     alertForSelectedDates model.startDateValue model.endDateValue
@@ -234,6 +241,21 @@ update msg model =
                     | endDateValue = d
                 }
                     |> update ComputeVacationDays
+
+        ChangeCampus campus ->
+            ( { model
+                | campus = campus
+                , campusDialog = False
+              }
+            , Cmd.none
+            )
+
+        OpenCampusDialog ->
+            ( { model
+                | campusDialog = True
+              }
+            , Cmd.none
+            )
 
 
 onEnter : Msg -> Attribute Msg
@@ -379,8 +401,8 @@ alertForSelectedDates startDate endDate =
                     }
 
 
-createVacationDaysList : Maybe StdDate.Date -> Maybe StdDate.Date -> List LeaveDay
-createVacationDaysList startDate endDate =
+createVacationDaysList : Holiday.Campus -> Maybe StdDate.Date -> Maybe StdDate.Date -> List LeaveDay
+createVacationDaysList campus startDate endDate =
     let
         vdays =
             case ( startDate, endDate ) of
@@ -394,7 +416,7 @@ createVacationDaysList startDate endDate =
                     [ leaveDay (elmDateToTimeDate end) Flexi ]
 
                 ( Just start, Just end ) ->
-                    calculateVacationDays (elmDateToTimeDate start) (elmDateToTimeDate end)
+                    calculateVacationDays campus (elmDateToTimeDate start) (elmDateToTimeDate end)
     in
         vdays
 
@@ -419,8 +441,8 @@ datesBetween start end =
         []
 
 
-calculateVacationDays : Date.Date -> Date.Date -> List LeaveDay
-calculateVacationDays startDate endDate =
+calculateVacationDays : Holiday.Campus -> Date.Date -> Date.Date -> List LeaveDay
+calculateVacationDays campus startDate endDate =
     let
         dates =
             datesBetween startDate endDate
@@ -445,7 +467,7 @@ calculateVacationDays startDate endDate =
                             <|
                                 (leaveDay hd Weekend)
                                     :: vacationDays
-                        else if (isHoliday hd) then
+                        else if (isHoliday campus hd) then
                             calculateVacationDaysRec
                                 flexiCounter
                                 tl
@@ -514,20 +536,25 @@ usageStatistics vacationDays =
 view : Model -> Html Msg
 view model =
     div [ class "" ]
-        [ viewNav model.viewMode
+        [ viewNav model.viewMode model.campus
         , viewMain model
         , viewFooter model.date
         ]
 
 
-viewNav : ViewMode -> Html Msg
-viewNav mode =
+viewNav : ViewMode -> Holiday.Campus -> Html Msg
+viewNav mode campus =
     header []
         [ nav [ class "navbar navbar-expand-md navbar-dark bg-dark " ]
             [ a [ class "navbar-brand flexiday-logo", href "#" ]
                 [ text "" ]
-            , div [ class "ml-auto d-none d-xl-block" ]
-                [ viewModeSwitch mode
+            , div [ class "ml-auto row" ]
+                [ div [ class "container d-none d-xl-block" ]
+                    [ viewModeSwitch mode
+                    ]
+                , div [ class "container" ]
+                    [ button [ class "btn btn-secondary btn-sm", onClick OpenCampusDialog ] [ text <| toString campus ]
+                    ]
                 ]
             ]
         ]
@@ -544,6 +571,12 @@ viewMain model =
                 Just alert ->
                     viewAlert alert
               )
+            , case model.campusDialog of
+                True ->
+                    viewCampusSelect model.campus
+
+                False ->
+                    text ""
             ]
         , div [ class "row" ]
             [ viewDatePicker "start" model.startDatePickerState model.startDateValue
@@ -918,6 +951,45 @@ viewAlert alert =
                    ]
 
 
+
+-- (on "change" (Json.Decode.succeed (ChangeCampus element)))
+
+
+viewCampusSelect : Holiday.Campus -> Html Msg
+viewCampusSelect campus =
+    let
+        campusOption element =
+            button
+                [ class
+                    (if element == campus then
+                        "btn btn-secondary btn-lg btn-block active"
+                     else
+                        "btn btn-dark btn-lg btn-block"
+                    )
+                , type_ "button"
+                , onClick (ChangeCampus element)
+                ]
+                [ text <| toString element ]
+    in
+        div []
+            [ div [ attribute "aria-hidden" "true", attribute "aria-labelledby" "selectCampus", class "modal fade show", attribute "role" "dialog", attribute "tabindex" "-1", style [ ( "display", "block" ) ] ]
+                [ div [ class "modal-dialog modal-sm" ]
+                    [ div [ class "modal-content" ]
+                        [ div [ class "modal-header" ] [ h4 [ class "modal-title" ] [ text "Select campus" ] ]
+                        , div [ class "modal-body" ]
+                            [ div [ class "container" ]
+                                (List.map
+                                    campusOption
+                                    Holiday.campuses
+                                )
+                            ]
+                        ]
+                    ]
+                ]
+            , div [ class "modal-backdrop fade show" ] []
+            ]
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
@@ -936,9 +1008,9 @@ isWeekend date =
             False
 
 
-isHoliday : Date.Date -> Bool
-isHoliday date =
-    List.member date holidays
+isHoliday : Holiday.Campus -> Date.Date -> Bool
+isHoliday campus date =
+    List.member date (Holiday.holidays campus)
 
 
 isEndOfReferencePeriod : Date.Date -> Bool
@@ -955,42 +1027,6 @@ isEndOfReferencePeriod date =
             Date.toTuple date
     in
         List.member ( day, month ) dates
-
-
-holidays : List Date.Date
-holidays =
-    estecHolidays2017 ++ estecHolidays2018
-
-
-estecHolidays2018 : List Date.Date
-estecHolidays2018 =
-    [ Date.date 2018 1 1
-    , Date.date 2018 3 30
-    , Date.date 2018 4 2
-    , Date.date 2018 4 27
-    , Date.date 2018 5 10
-    , Date.date 2018 5 21
-    , Date.date 2018 12 24
-    , Date.date 2018 12 25
-    , Date.date 2018 12 26
-    , Date.date 2018 12 27
-    , Date.date 2018 12 28
-    , Date.date 2018 12 31
-    ]
-
-
-estecHolidays2017 : List Date.Date
-estecHolidays2017 =
-    [ Date.date 2017 12 24
-    , Date.date 2017 12 25
-    , Date.date 2017 12 26
-    , Date.date 2017 12 27
-    , Date.date 2017 12 28
-    , Date.date 2017 12 29
-    , Date.date 2017 12 30
-    , Date.date 2017 12 31
-    , Date.date 2018 1 1
-    ]
 
 
 padded : Int -> String
