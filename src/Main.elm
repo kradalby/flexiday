@@ -190,8 +190,19 @@ update msg model =
                 vacationDays =
                     createVacationDaysList model.campus model.startDateValue model.endDateValue
 
-                alert =
+                selectedDateAlert =
                     alertForSelectedDates model.startDateValue model.endDateValue
+
+                alert =
+                    case selectedDateAlert of
+                        Nothing ->
+                            if model.alert == Just openingAlert then
+                                Just openingAlert
+                            else
+                                Nothing
+
+                        Just a ->
+                            selectedDateAlert
             in
                 ( { model
                     | vacationDays = vacationDays
@@ -549,7 +560,7 @@ viewNav mode campus =
             [ a [ class "navbar-brand flexiday-logo", href "#" ]
                 [ text "" ]
             , div [ class "ml-auto row" ]
-                [ div [ class "container d-none d-xl-block" ]
+                [ div [ class "d-none d-xl-block" ]
                     [ viewModeSwitch mode
                     ]
                 , div [ class "container" ]
