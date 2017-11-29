@@ -7,7 +7,7 @@ import Date.Extra.Format
 import DateParser
 import Html exposing (..)
 import Html.Events exposing (..)
-import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for, href, attribute, property)
+import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for, href, attribute, property, pattern)
 import Json.Decode exposing (Decoder, int, string, list)
 import Json.Encode
 import Task
@@ -151,6 +151,8 @@ type Msg
     | ChangeViewMode ViewMode
     | SetAlert Alert
     | DeleteAlert
+    | UpdateStartDateSmallScreen String
+    | UpdateEndDateSmallScreen String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -212,6 +214,26 @@ update msg model =
               }
             , Cmd.none
             )
+
+        UpdateStartDateSmallScreen str ->
+            let
+                d =
+                    StdDate.fromString str |> Result.toMaybe
+            in
+                { model
+                    | startDateValue = d
+                }
+                    |> update ComputeVacationDays
+
+        UpdateEndDateSmallScreen str ->
+            let
+                d =
+                    StdDate.fromString str |> Result.toMaybe
+            in
+                { model
+                    | endDateValue = d
+                }
+                    |> update ComputeVacationDays
 
 
 onEnter : Msg -> Attribute Msg
@@ -526,6 +548,8 @@ viewMain model =
         , div [ class "row" ]
             [ viewDatePicker "start" model.startDatePickerState model.startDateValue
             , viewDatePicker "end" model.endDatePickerState model.endDateValue
+            , viewDatePickerSmallScreen "start" model.startDateValue
+            , viewDatePickerSmallScreen "stop" model.endDateValue
             ]
         , div [ class "row mt-3" ]
             [ (case model.viewMode of
@@ -782,6 +806,41 @@ viewUsage usage =
         ]
 
 
+viewDatePickerSmallScreen : String -> Maybe StdDate.Date -> Html Msg
+viewDatePickerSmallScreen name value =
+    let
+        date =
+            case value of
+                Nothing ->
+                    attribute "" ""
+
+                Just v ->
+                    type_ <| Date.toISO8601 <| elmDateToTimeDate v
+    in
+        div [ class "col-sm mt-3 d-sm-none d-md-none d-lg-none d-xl-none" ]
+            [ h2 [] [ text ("Vacation " ++ name) ]
+            , form []
+                [ div []
+                    [ input
+                        [ class "form-control"
+                        , attribute "min" "2017-01-01"
+                        , type_ "date"
+                        , pattern "[0-9]{2}-[0-9]{2}-[0-9]{4}"
+                        , onInput
+                            (case name of
+                                "start" ->
+                                    UpdateStartDateSmallScreen
+
+                                _ ->
+                                    UpdateEndDateSmallScreen
+                            )
+                        ]
+                        []
+                    ]
+                ]
+            ]
+
+
 viewDatePicker : String -> DateTimePicker.State -> Maybe StdDate.Date -> Html Msg
 viewDatePicker name state value =
     let
@@ -806,7 +865,7 @@ viewDatePicker name state value =
                     , i18n = { defaultDateI18n | inputFormat = customInputFormat }
                 }
     in
-        div [ class "col-sm mt-3" ]
+        div [ class "col-sm mt-3  d-none d-sm-none d-md-block d-lg-block d-xl-block" ]
             [ h2 [] [ text ("Vacation " ++ name) ]
             , form []
                 [ Html.node "style" [] [ Html.text css ]
