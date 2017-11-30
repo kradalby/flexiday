@@ -18,8 +18,6 @@ clean: ;@echo "-- Cleaning up dist files"
 install: ;@echo "-- Installing dependencies"
 	elm package install -y
 	npm i --silent
-	git submodule init
-	git submodule update
 
 deinstall: ;@echo "-- Removing dependencies"
 	rm -rf elm-stuff/
