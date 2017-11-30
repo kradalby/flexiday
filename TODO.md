@@ -6,3 +6,5 @@
 - ~Warning message when user enters end date before start date~
 - ~Change the input type (date field on small devices, text with selector on big)~
 - ~Add other ESA sites~
+
+- Bug: changing campus does not update distribution
