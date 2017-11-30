@@ -29,6 +29,7 @@ holidays campus =
 
         ESRIN ->
             esrinHolidays
+
         ESOC ->
             esocHolidays
 
@@ -40,7 +41,6 @@ holidays campus =
 
         EAC ->
             eacHolidays
-
 
 
 estecHolidays2018 : List Date.Date
@@ -98,7 +98,7 @@ hqHolidays2018 =
 
 hqHolidays2017 : List Date.Date
 hqHolidays2017 =
-    , Date.date 2017 12 25
+    [ Date.date 2017 12 25
     , Date.date 2017 12 26
     , Date.date 2017 12 27
     , Date.date 2017 12 28
@@ -130,7 +130,7 @@ esrinHolidays2018 =
 
 esrinHolidays2017 : List Date.Date
 esrinHolidays2017 =
-    , Date.date 2017 12 25
+    [ Date.date 2017 12 25
     , Date.date 2017 12 26
     , Date.date 2017 12 27
     , Date.date 2017 12 28
@@ -141,6 +141,7 @@ esrinHolidays2017 =
 esrinHolidays : List Date.Date
 esrinHolidays =
     esrinHolidays2017 ++ esrinHolidays2018
+
 
 esocHolidays2018 : List Date.Date
 esocHolidays2018 =
@@ -160,7 +161,7 @@ esocHolidays2018 =
 
 esocHolidays2017 : List Date.Date
 esocHolidays2017 =
-    , Date.date 2017 12 25
+    [ Date.date 2017 12 25
     , Date.date 2017 12 26
     ]
 
@@ -168,6 +169,7 @@ esocHolidays2017 =
 esocHolidays : List Date.Date
 esocHolidays =
     esocHolidays2017 ++ esocHolidays2018
+
 
 esacHolidays2018 : List Date.Date
 esacHolidays2018 =
@@ -198,6 +200,7 @@ esacHolidays : List Date.Date
 esacHolidays =
     esacHolidays2017 ++ esacHolidays2018
 
+
 ecsatHolidays2018 : List Date.Date
 ecsatHolidays2018 =
     [ Date.date 2018 1 1
@@ -217,7 +220,7 @@ ecsatHolidays2018 =
 
 ecsatHolidays2017 : List Date.Date
 ecsatHolidays2017 =
-    , Date.date 2017 12 25
+    [ Date.date 2017 12 25
     , Date.date 2017 12 26
     , Date.date 2017 12 27
     , Date.date 2017 12 28
@@ -228,6 +231,7 @@ ecsatHolidays2017 =
 ecsatHolidays : List Date.Date
 ecsatHolidays =
     ecsatHolidays2017 ++ ecsatHolidays2018
+
 
 eacHolidays2018 : List Date.Date
 eacHolidays2018 =
