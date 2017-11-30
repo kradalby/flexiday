@@ -254,12 +254,11 @@ update msg model =
                     |> update ComputeVacationDays
 
         ChangeCampus campus ->
-            ( { model
+            { model
                 | campus = campus
                 , campusDialog = False
-              }
-            , Cmd.none
-            )
+            }
+                |> update ComputeVacationDays
 
         OpenCampusDialog ->
             ( { model
