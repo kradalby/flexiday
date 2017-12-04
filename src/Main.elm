@@ -613,10 +613,11 @@ viewFooter d =
         [ div [ class "container-fluid" ]
             [ div [ class "row" ]
                 [ div [ class "col-sm text-muted" ]
-                    [ text "Made with "
-                    , a [ href "http://elm-lang.org" ] [ text "Elm" ]
+                    [ text "Made with <3 in "
+                    , a [ href "http://elm-lang.org" ] [ text "Elm " ]
+                    , text "by ", a [ href "https://kradalby.no" ] [ text " Kristoffer Dalby" ]
                     ]
-                , div [ class "col-sm text-muted " ]
+                , div [ class "col-sm text-muted text-right" ]
                     [ text
                         ("Copyright "
                             ++ (toString
@@ -630,7 +631,6 @@ viewFooter d =
                                )
                             ++ " "
                         )
-                    , a [ href "https://kradalby.no" ] [ text " Kristoffer Dalby" ]
                     ]
                 ]
             ]
