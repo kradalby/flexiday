@@ -43,6 +43,12 @@ holidays campus =
             eacHolidays
 
 
+estecHolidays2019 : List Date.Date
+estecHolidays2019 =
+    [ Date.date 2019 1 1
+    ]
+
+
 estecHolidays2018 : List Date.Date
 estecHolidays2018 =
     [ Date.date 2018 1 1
@@ -76,7 +82,13 @@ estecHolidays2017 =
 
 estecHolidays : List Date.Date
 estecHolidays =
-    estecHolidays2017 ++ estecHolidays2018
+    estecHolidays2017 ++ estecHolidays2018 ++ estecHolidays2019
+
+
+hqHolidays2019 : List Date.Date
+hqHolidays2019 =
+    [ Date.date 2019 1 1
+    ]
 
 
 hqHolidays2018 : List Date.Date
@@ -108,7 +120,13 @@ hqHolidays2017 =
 
 hqHolidays : List Date.Date
 hqHolidays =
-    hqHolidays2017 ++ hqHolidays2018
+    hqHolidays2017 ++ hqHolidays2018 ++ hqHolidays2019
+
+
+esrinHolidays2019 : List Date.Date
+esrinHolidays2019 =
+    [ Date.date 2019 1 1
+    ]
 
 
 esrinHolidays2018 : List Date.Date
@@ -140,7 +158,13 @@ esrinHolidays2017 =
 
 esrinHolidays : List Date.Date
 esrinHolidays =
-    esrinHolidays2017 ++ esrinHolidays2018
+    esrinHolidays2017 ++ esrinHolidays2018 ++ esrinHolidays2019
+
+
+esocHolidays2019 : List Date.Date
+esocHolidays2019 =
+    [ Date.date 2019 1 1
+    ]
 
 
 esocHolidays2018 : List Date.Date
@@ -168,7 +192,13 @@ esocHolidays2017 =
 
 esocHolidays : List Date.Date
 esocHolidays =
-    esocHolidays2017 ++ esocHolidays2018
+    esocHolidays2017 ++ esocHolidays2018 ++ esocHolidays2019
+
+
+esacHolidays2019 : List Date.Date
+esacHolidays2019 =
+    [ Date.date 2019 1 1
+    ]
 
 
 esacHolidays2018 : List Date.Date
@@ -198,7 +228,13 @@ esacHolidays2017 =
 
 esacHolidays : List Date.Date
 esacHolidays =
-    esacHolidays2017 ++ esacHolidays2018
+    esacHolidays2017 ++ esacHolidays2018 ++ esacHolidays2019
+
+
+ecsatHolidays2019 : List Date.Date
+ecsatHolidays2019 =
+    [ Date.date 2019 1 1
+    ]
 
 
 ecsatHolidays2018 : List Date.Date
@@ -230,7 +266,13 @@ ecsatHolidays2017 =
 
 ecsatHolidays : List Date.Date
 ecsatHolidays =
-    ecsatHolidays2017 ++ ecsatHolidays2018
+    ecsatHolidays2017 ++ ecsatHolidays2018 ++ ecsatHolidays2019
+
+
+eacHolidays2019 : List Date.Date
+eacHolidays2019 =
+    [ Date.date 2019 1 1
+    ]
 
 
 eacHolidays2018 : List Date.Date
@@ -259,4 +301,4 @@ eacHolidays2017 =
 
 eacHolidays : List Date.Date
 eacHolidays =
-    eacHolidays2017 ++ eacHolidays2018
+    eacHolidays2017 ++ eacHolidays2018 ++ eacHolidays2019
