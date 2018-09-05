@@ -13,7 +13,7 @@ pipeline:
     deployment: flexiday-deployment
     repo: kradalby/flexiday
     container: flexiday-container
-    namespace: flexiday
+    namespace: default
     secrets: [ kubernetes_server, kubernetes_cert, kubernetes_token ]
     tag:
         - ${DRONE_COMMIT_SHA:0:8} 
