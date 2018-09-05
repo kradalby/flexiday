@@ -26,3 +26,4 @@ pipeline:
     recipients: [ kradalby@kradalby.no ]
     when:
       status: [ success, changed, failure ]
+      
