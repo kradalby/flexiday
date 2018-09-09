@@ -615,7 +615,8 @@ viewFooter d =
                 [ div [ class "col-sm text-muted" ]
                     [ text "Made with <3 in "
                     , a [ href "http://elm-lang.org" ] [ text "Elm " ]
-                    , text "by ", a [ href "https://kradalby.no" ] [ text " Kristoffer Dalby" ]
+                    , text "by "
+                    , a [ href "https://kradalby.no" ] [ text " Kristoffer Dalby" ]
                     ]
                 , div [ class "col-sm text-muted text-right" ]
                     [ text
@@ -639,7 +640,7 @@ viewFooter d =
 
 viewModeSwitch : ViewMode -> Html Msg
 viewModeSwitch currentMode =
-    div [ class "btn-group", attribute "data-toggle" "buttons" ]
+    div [ class "btn-group btn-group-toggle", attribute "data-toggle" "buttons" ]
         [ label
             [ class
                 (case currentMode of
@@ -651,7 +652,7 @@ viewModeSwitch currentMode =
                 )
             , onClick (ChangeViewMode Table)
             ]
-            [ input [ type_ "radio", name "mode", attribute "autocomplete" "off", id "option2" ] []
+            [ input [ type_ "radio", name "mode", attribute "autocomplete" "off", id "option2", style [ ( "visability", "hidden" ) ] ] []
             , text "Table"
             ]
         , label
@@ -665,7 +666,7 @@ viewModeSwitch currentMode =
                 )
             , onClick (ChangeViewMode Calendar)
             ]
-            [ input [ type_ "radio", name "mode", attribute "autocomplete" "off", id "option1" ] []
+            [ input [ type_ "radio", name "mode", attribute "autocomplete" "off", id "option1", style [ ( "visability", "hidden" ) ] ] []
             , text "Calendar"
             ]
         ]
@@ -849,6 +850,15 @@ viewUsage usage =
         ]
 
 
+onInputWithOptions : (String -> msg) -> Attribute msg
+onInputWithOptions tagger =
+    let
+        options =
+            { preventDefault = True, stopPropagation = True }
+    in
+        onWithOptions "input" options (Json.Decode.map tagger targetValue)
+
+
 viewDatePickerSmallScreen : String -> Maybe StdDate.Date -> Html Msg
 viewDatePickerSmallScreen name value =
     let
@@ -869,7 +879,7 @@ viewDatePickerSmallScreen name value =
                         , attribute "min" "2017-01-01"
                         , type_ "date"
                         , pattern "[0-9]{2}-[0-9]{2}-[0-9]{4}"
-                        , onInput
+                        , onInputWithOptions
                             (case name of
                                 "start" ->
                                     UpdateStartDateSmallScreen
