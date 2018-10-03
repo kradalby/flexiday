@@ -46,6 +46,17 @@ holidays campus =
 estecHolidays2019 : List Date.Date
 estecHolidays2019 =
     [ Date.date 2019 1 1
+    , Date.date 2019 4 19
+    , Date.date 2019 4 22
+    , Date.date 2019 5 30
+    , Date.date 2019 6 10
+    , Date.date 2019 12 23
+    , Date.date 2019 12 24
+    , Date.date 2019 12 25
+    , Date.date 2019 12 26
+    , Date.date 2019 12 27
+    , Date.date 2019 12 30
+    , Date.date 2019 12 31
     ]
 
 
@@ -88,6 +99,17 @@ estecHolidays =
 hqHolidays2019 : List Date.Date
 hqHolidays2019 =
     [ Date.date 2019 1 1
+    , Date.date 2019 4 22
+    , Date.date 2019 5 1
+    , Date.date 2019 5 30
+    , Date.date 2019 6 10
+    , Date.date 2019 8 15
+    , Date.date 2019 11 1
+    , Date.date 2019 12 25
+    , Date.date 2019 12 26
+    , Date.date 2019 12 27
+    , Date.date 2019 12 30
+    , Date.date 2019 12 31
     ]
 
 
@@ -126,6 +148,16 @@ hqHolidays =
 esrinHolidays2019 : List Date.Date
 esrinHolidays2019 =
     [ Date.date 2019 1 1
+    , Date.date 2019 4 22
+    , Date.date 2019 4 25
+    , Date.date 2019 5 1
+    , Date.date 2019 8 15
+    , Date.date 2019 12 24
+    , Date.date 2019 12 25
+    , Date.date 2019 12 26
+    , Date.date 2019 12 27
+    , Date.date 2019 12 30
+    , Date.date 2019 12 31
     ]
 
 
@@ -164,6 +196,17 @@ esrinHolidays =
 esocHolidays2019 : List Date.Date
 esocHolidays2019 =
     [ Date.date 2019 1 1
+    , Date.date 2019 4 19
+    , Date.date 2019 4 22
+    , Date.date 2019 5 1
+    , Date.date 2019 5 30
+    , Date.date 2019 5 31
+    , Date.date 2019 6 10
+    , Date.date 2019 6 20
+    , Date.date 2019 6 21
+    , Date.date 2019 10 3
+    , Date.date 2019 12 25
+    , Date.date 2019 12 26
     ]
 
 
@@ -198,6 +241,17 @@ esocHolidays =
 esacHolidays2019 : List Date.Date
 esacHolidays2019 =
     [ Date.date 2019 1 1
+    , Date.date 2019 1 7
+    , Date.date 2019 4 18
+    , Date.date 2019 4 19
+    , Date.date 2019 5 1
+    , Date.date 2019 5 2
+    , Date.date 2019 8 15
+    , Date.date 2019 11 1
+    , Date.date 2019 12 6
+    , Date.date 2019 12 9
+    , Date.date 2019 12 24
+    , Date.date 2019 12 25
     ]
 
 
@@ -234,6 +288,17 @@ esacHolidays =
 ecsatHolidays2019 : List Date.Date
 ecsatHolidays2019 =
     [ Date.date 2019 1 1
+    , Date.date 2019 4 19
+    , Date.date 2019 4 22
+    , Date.date 2019 5 6
+    , Date.date 2019 5 27
+    , Date.date 2019 8 26
+    , Date.date 2019 12 24
+    , Date.date 2019 12 25
+    , Date.date 2019 12 26
+    , Date.date 2019 12 27
+    , Date.date 2019 12 30
+    , Date.date 2019 12 31
     ]
 
 
@@ -272,6 +337,17 @@ ecsatHolidays =
 eacHolidays2019 : List Date.Date
 eacHolidays2019 =
     [ Date.date 2019 1 1
+    , Date.date 2019 4 19
+    , Date.date 2019 4 22
+    , Date.date 2019 5 1
+    , Date.date 2019 5 30
+    , Date.date 2019 6 10
+    , Date.date 2019 6 20
+    , Date.date 2019 10 3
+    , Date.date 2019 11 1
+    , Date.date 2019 11 4
+    , Date.date 2019 12 25
+    , Date.date 2019 12 26
     ]
 
 
