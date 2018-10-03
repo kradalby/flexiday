@@ -603,6 +603,7 @@ viewMain model =
                     viewVacationDaysTable model.vacationDays
               )
             , viewUsage model.usage
+            , viewHolidays model.campus
             ]
         ]
 
@@ -846,6 +847,26 @@ viewUsage usage =
                         [ strong [] [ text <| toString usage.total ] ]
                     ]
                 ]
+            ]
+        ]
+
+
+viewHolidays : Holiday.Campus -> Html Msg
+viewHolidays campus =
+    div [ class "col-sm-4" ]
+        [ h2 [] [ text "Holidays" ]
+        , table [ class "table table-striped table-bordered" ]
+            [ tbody [] <|
+                List.map
+                    (\date ->
+                        tr []
+                            [ td []
+                                [ text <| toString date ]
+                            ]
+                    )
+                <|
+                    Holiday.holidays
+                        campus
             ]
         ]
 
