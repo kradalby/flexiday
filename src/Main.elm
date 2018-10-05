@@ -602,8 +602,15 @@ viewMain model =
                 Table ->
                     viewVacationDaysTable model.vacationDays
               )
-            , viewUsage model.usage
-            , viewHolidays model.campus
+            , div [ class "col-sm-4 pl-0 pr-0" ]
+                [ viewUsage model.usage
+                , case model.date of
+                    Nothing ->
+                        text ""
+
+                    Just date ->
+                        viewHolidays date model.campus
+                ]
             ]
         ]
 
@@ -804,7 +811,7 @@ viewLeaveDayTable leaveDay =
 
 viewUsage : Usage -> Html Msg
 viewUsage usage =
-    div [ class "col-sm-4" ]
+    div [ class "col-sm-12" ]
         [ h2 [] [ text "Usage" ]
         , table [ class "table table-striped table-bordered" ]
             [ thead []
@@ -851,24 +858,51 @@ viewUsage usage =
         ]
 
 
-viewHolidays : Holiday.Campus -> Html Msg
-viewHolidays campus =
-    div [ class "col-sm-4" ]
-        [ h2 [] [ text "Holidays" ]
-        , table [ class "table table-striped table-bordered" ]
-            [ tbody [] <|
-                List.map
-                    (\date ->
-                        tr []
-                            [ td []
-                                [ text <| toString date ]
-                            ]
-                    )
-                <|
-                    Holiday.holidays
-                        campus
+viewHolidays : StdDate.Date -> Holiday.Campus -> Html Msg
+viewHolidays today campus =
+    let
+        date =
+            elmDateToTimeDate today
+
+        holidays =
+            List.filter (\d -> Date.toTuple d > Date.toTuple date) <| Holiday.holidays campus
+
+        rows =
+            buildRows holidays []
+
+        buildRows dates result =
+            case dates of
+                [] ->
+                    result
+
+                l :: r :: rest ->
+                    buildRows rest <|
+                        result
+                            ++ [ (tr []
+                                    [ td [] [ text <| dateToString l ]
+                                    , td [] [ text <| dateToString r ]
+                                    ]
+                                 )
+                               ]
+
+                l :: rest ->
+                    buildRows rest <|
+                        result
+                            ++ [ (tr []
+                                    [ td [] [ text <| dateToString l ]
+                                    ]
+                                 )
+                               ]
+
+        dateToString d =
+            (padded <| Date.day d) ++ "-" ++ (padded <| Date.month d) ++ "-" ++ (toString <| Date.year d)
+    in
+        div [ class "col-sm-12" ]
+            [ h2 [] [ text "Public holidays" ]
+            , table [ class "table table-striped table-bordered" ]
+                [ tbody [] rows
+                ]
             ]
-        ]
 
 
 onInputWithOptions : (String -> msg) -> Attribute msg
