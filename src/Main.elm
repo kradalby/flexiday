@@ -7,7 +7,7 @@ import Date.Extra.Format
 import DateParser
 import Html exposing (..)
 import Html.Events exposing (..)
-import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for, href, attribute, property, pattern, style)
+import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for, href, attribute, property, pattern, style, colspan)
 import Json.Decode
 import Json.Encode
 import Task
@@ -610,6 +610,7 @@ viewMain model =
 
                     Just date ->
                         viewHolidays date model.campus
+                , viewTips
                 ]
             ]
         ]
@@ -903,6 +904,48 @@ viewHolidays today campus =
                 [ tbody [] rows
                 ]
             ]
+
+
+viewTips : Html Msg
+viewTips =
+    div [ class "col-sm-12" ]
+        [ h2 [] [ text "Rules and tips" ]
+        , table [ class "table table-striped table-bordered" ]
+            [ tbody []
+                [ tr []
+                    [ td [] [ text "Per year" ]
+                    , td [] [ text "24 flexis" ]
+                    ]
+                , tr []
+                    [ td [] [ text "Per quarter" ]
+                    , td [] [ text "8 flexis" ]
+                    ]
+                , tr []
+                    [ td [] [ text "Per month" ]
+                    , td [] [ text "4 flexis" ]
+                    ]
+                , tr []
+                    [ td [] [ text "Per week" ]
+                    , td [] [ text "1 flexis" ]
+                    ]
+                , tr []
+                    [ td [ colspan 2 ] [ text "Flexis can be split in half days" ]
+                    ]
+                , tr []
+                    [ td [ colspan 2 ] [ text "Quarter change allows two flexis" ]
+                    ]
+                , tr []
+                    [ td [ colspan 2 ] [ text "Start holidays on friday or saturday" ]
+                    ]
+                , tr []
+                    [ td [ colspan 2 ] [ text "Only 24 hours can be taken to next year" ]
+                    ]
+                , tr []
+                    [ td [ colspan 2 ] [ text "Take one flexi before and after christmas" ]
+                    ]
+                ]
+            ]
+        ]
 
 
 onInputWithOptions : (String -> msg) -> Attribute msg
