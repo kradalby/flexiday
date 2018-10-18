@@ -344,8 +344,8 @@ eacHolidays2019 =
     , Date.date 2019 6 10
     , Date.date 2019 6 20
     , Date.date 2019 10 3
+    , Date.date 2019 10 4
     , Date.date 2019 11 1
-    , Date.date 2019 11 4
     , Date.date 2019 12 25
     , Date.date 2019 12 26
     ]
