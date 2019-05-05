@@ -1,21 +1,21 @@
-module Main exposing (..)
+module Main exposing (Alert, AlertColor(..), LeaveDay, LeaveType(..), Model, Msg(..), Usage, ViewMode(..), alertForSelectedDates, alertToBootstrapCSS, calculateVacationDays, createVacationDaysList, customDatePattern, customInputFormat, datesBetween, dayOfWeekAsIndex, elmDateToTimeDate, elmMonthToInt, init, initUsage, isEndOfReferencePeriod, isHoliday, isWeekend, leaveDay, main, onEnter, onInputWithOptions, openingAlert, padded, subscriptions, update, usageStatistics, view, viewAlert, viewCampusSelect, viewDatePicker, viewDatePickerSmallScreen, viewEmptyCalendar, viewFooter, viewHolidays, viewLeaveDayCalendar, viewLeaveDayTable, viewMain, viewModeSwitch, viewNav, viewTips, viewUsage, viewVacationDaysCalendar, viewVacationDaysTable, workDaysBetweenFlexi)
 
 import Css
 import Date as StdDate
 import Date.Extra.Config.Config_en_us exposing (config)
 import Date.Extra.Format
 import DateParser
+import DateTimePicker
+import DateTimePicker.Config exposing (defaultDateI18n, defaultDatePickerConfig, defaultDateTimePickerConfig)
+import DateTimePicker.Css
+import Holiday
 import Html exposing (..)
+import Html.Attributes exposing (attribute, checked, class, colspan, disabled, for, href, id, name, pattern, property, selected, src, style, type_, value)
 import Html.Events exposing (..)
-import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for, href, attribute, property, pattern, style, colspan)
 import Json.Decode
 import Json.Encode
 import Task
 import Time.Date as Date
-import DateTimePicker
-import DateTimePicker.Config exposing (defaultDatePickerConfig, defaultDateTimePickerConfig, defaultDateI18n)
-import DateTimePicker.Css
-import Holiday
 
 
 workDaysBetweenFlexi : Int
@@ -198,19 +198,20 @@ update msg model =
                         Nothing ->
                             if model.alert == Just openingAlert then
                                 Just openingAlert
+
                             else
                                 Nothing
 
                         Just a ->
                             selectedDateAlert
             in
-                ( { model
-                    | vacationDays = vacationDays
-                    , usage = (usageStatistics vacationDays)
-                    , alert = alert
-                  }
-                , Cmd.none
-                )
+            ( { model
+                | vacationDays = vacationDays
+                , usage = usageStatistics vacationDays
+                , alert = alert
+              }
+            , Cmd.none
+            )
 
         ChangeViewMode mode ->
             ( { model
@@ -238,20 +239,20 @@ update msg model =
                 d =
                     StdDate.fromString str |> Result.toMaybe
             in
-                { model
-                    | startDateValue = d
-                }
-                    |> update ComputeVacationDays
+            { model
+                | startDateValue = d
+            }
+                |> update ComputeVacationDays
 
         UpdateEndDateSmallScreen str ->
             let
                 d =
                     StdDate.fromString str |> Result.toMaybe
             in
-                { model
-                    | endDateValue = d
-                }
-                    |> update ComputeVacationDays
+            { model
+                | endDateValue = d
+            }
+                |> update ComputeVacationDays
 
         ChangeCampus campus ->
             { model
@@ -274,10 +275,11 @@ onEnter msg =
         isEnter code =
             if code == 13 then
                 Json.Decode.succeed msg
+
             else
                 Json.Decode.fail "not ENTER"
     in
-        on "keydown" (Json.Decode.andThen isEnter keyCode)
+    on "keydown" (Json.Decode.andThen isEnter keyCode)
 
 
 alertToBootstrapCSS : AlertColor -> String
@@ -350,7 +352,7 @@ elmMonthToInt month =
 
 dayOfWeekAsIndex : Date.Date -> Int
 dayOfWeekAsIndex day =
-    case (Date.weekday day) of
+    case Date.weekday day of
         Date.Mon ->
             0
 
@@ -398,8 +400,9 @@ alertForSelectedDates startDate endDate =
             Nothing
 
         ( Just start, Just end ) ->
-            if (Date.compare (elmDateToTimeDate start) (elmDateToTimeDate end)) == LT then
+            if Date.compare (elmDateToTimeDate start) (elmDateToTimeDate end) == LT then
                 Nothing
+
             else
                 Just
                     { message =
@@ -428,12 +431,12 @@ createVacationDaysList campus startDate endDate =
                 ( Just start, Just end ) ->
                     calculateVacationDays campus (elmDateToTimeDate start) (elmDateToTimeDate end)
     in
-        vdays
+    vdays
 
 
 datesBetween : Date.Date -> Date.Date -> List Date.Date
 datesBetween start end =
-    if (Date.compare start end) == LT then
+    if Date.compare start end == LT then
         let
             datesBetweenRec : Date.Date -> Date.Date -> List Date.Date -> List Date.Date
             datesBetweenRec current end result =
@@ -441,12 +444,14 @@ datesBetween start end =
                     newCurrent =
                         Date.addDays 1 current
                 in
-                    if current == (Date.addDays 1 end) then
-                        result
-                    else
-                        datesBetweenRec newCurrent end (current :: result)
+                if current == Date.addDays 1 end then
+                    result
+
+                else
+                    datesBetweenRec newCurrent end (current :: result)
         in
-            List.reverse <| datesBetweenRec start end []
+        List.reverse <| datesBetweenRec start end []
+
     else
         []
 
@@ -465,41 +470,45 @@ calculateVacationDays campus startDate endDate =
                 hd :: tl ->
                     let
                         flexiCounter =
-                            if (isEndOfReferencePeriod hd) then
+                            if isEndOfReferencePeriod hd then
                                 5
+
                             else
                                 workDaysSinceLastFlexi
                     in
-                        if (isWeekend hd) then
-                            calculateVacationDaysRec
-                                flexiCounter
-                                tl
-                            <|
-                                (leaveDay hd Weekend)
-                                    :: vacationDays
-                        else if (isHoliday campus hd) then
-                            calculateVacationDaysRec
-                                flexiCounter
-                                tl
-                            <|
-                                (leaveDay hd Holiday)
-                                    :: vacationDays
-                        else if workDaysSinceLastFlexi == workDaysBetweenFlexi then
-                            calculateVacationDaysRec
-                                0
-                                tl
-                            <|
-                                (leaveDay hd Flexi)
-                                    :: vacationDays
-                        else
-                            calculateVacationDaysRec
-                                (flexiCounter + 1)
-                                tl
-                            <|
-                                (leaveDay hd Annual)
-                                    :: vacationDays
+                    if isWeekend hd then
+                        calculateVacationDaysRec
+                            flexiCounter
+                            tl
+                        <|
+                            leaveDay hd Weekend
+                                :: vacationDays
+
+                    else if isHoliday campus hd then
+                        calculateVacationDaysRec
+                            flexiCounter
+                            tl
+                        <|
+                            leaveDay hd Holiday
+                                :: vacationDays
+
+                    else if workDaysSinceLastFlexi == workDaysBetweenFlexi then
+                        calculateVacationDaysRec
+                            0
+                            tl
+                        <|
+                            leaveDay hd Flexi
+                                :: vacationDays
+
+                    else
+                        calculateVacationDaysRec
+                            (flexiCounter + 1)
+                            tl
+                        <|
+                            leaveDay hd Annual
+                                :: vacationDays
     in
-        List.reverse (calculateVacationDaysRec 5 dates [])
+    List.reverse (calculateVacationDaysRec 5 dates [])
 
 
 usageStatistics : List LeaveDay -> Usage
@@ -512,7 +521,7 @@ usageStatistics vacationDays =
                         { date, leaveType } =
                             elem
                     in
-                        leaveType :: result
+                    leaveType :: result
                 )
                 []
                 vacationDays
@@ -540,7 +549,7 @@ usageStatistics vacationDays =
         usageWithTotal =
             { initUsage | total = List.length vacationDays }
     in
-        countUsageRec vacationTypes usageWithTotal
+    countUsageRec vacationTypes usageWithTotal
 
 
 view : Model -> Html Msg
@@ -574,13 +583,12 @@ viewMain : Model -> Html Msg
 viewMain model =
     main_ [ class "container-fluid", attribute "role" "main" ]
         [ div [ class "col-sm-12" ]
-            [ (case model.alert of
+            [ case model.alert of
                 Nothing ->
                     text ""
 
                 Just alert ->
                     viewAlert alert
-              )
             , case model.campusDialog of
                 True ->
                     viewCampusSelect model.campus
@@ -595,13 +603,12 @@ viewMain model =
             , viewDatePickerSmallScreen "stop" model.endDateValue
             ]
         , div [ class "row mt-3" ]
-            [ (case model.viewMode of
+            [ case model.viewMode of
                 Calendar ->
                     viewVacationDaysCalendar model.vacationDays
 
                 Table ->
                     viewVacationDaysTable model.vacationDays
-              )
             , div [ class "col-sm-4 pl-0 pr-0" ]
                 [ viewUsage model.usage
                 , case model.date of
@@ -630,15 +637,14 @@ viewFooter d =
                 , div [ class "col-sm text-muted text-right" ]
                     [ text
                         ("Copyright "
-                            ++ (toString
-                                    (case d of
-                                        Nothing ->
-                                            1337
+                            ++ toString
+                                (case d of
+                                    Nothing ->
+                                        1337
 
-                                        Just date ->
-                                            StdDate.year date
-                                    )
-                               )
+                                    Just date ->
+                                        StdDate.year date
+                                )
                             ++ " "
                         )
                     ]
@@ -688,7 +694,7 @@ viewVacationDaysCalendar vacationDays =
             List.repeat (dayOfWeekAsIndex day.date) viewEmptyCalendar
 
         padWeekEnd day =
-            List.repeat (abs ((dayOfWeekAsIndex day.date) - 6)) viewEmptyCalendar
+            List.repeat (abs (dayOfWeekAsIndex day.date - 6)) viewEmptyCalendar
 
         cards vacationDays results =
             case vacationDays of
@@ -696,15 +702,15 @@ viewVacationDaysCalendar vacationDays =
                     results
 
                 hd :: [ rest ] ->
-                    cards [] <| results ++ [ (viewLeaveDayCalendar hd), (viewLeaveDayCalendar rest) ] ++ (padWeekEnd rest)
+                    cards [] <| results ++ [ viewLeaveDayCalendar hd, viewLeaveDayCalendar rest ] ++ padWeekEnd rest
 
                 hd :: tl ->
                     case results of
                         [] ->
-                            cards tl <| (padWeekStart hd) ++ [ (viewLeaveDayCalendar hd) ]
+                            cards tl <| padWeekStart hd ++ [ viewLeaveDayCalendar hd ]
 
                         _ ->
-                            cards tl <| results ++ [ (viewLeaveDayCalendar hd) ]
+                            cards tl <| results ++ [ viewLeaveDayCalendar hd ]
 
         rows vacationDaysCalendar results =
             let
@@ -714,40 +720,40 @@ viewVacationDaysCalendar vacationDays =
                 tl =
                     List.drop 7 vacationDaysCalendar
             in
-                case ((Debug.log "length" <| List.length vacationDaysCalendar) % 7) of
-                    0 ->
-                        case vacationDaysCalendar of
-                            [] ->
-                                results
+            case (Debug.log "length" <| List.length vacationDaysCalendar) % 7 of
+                0 ->
+                    case vacationDaysCalendar of
+                        [] ->
+                            results
 
-                            _ ->
-                                rows tl <| results ++ [ div [ class "row" ] hd ]
+                        _ ->
+                            rows tl <| results ++ [ div [ class "row" ] hd ]
 
-                    _ ->
-                        results
+                _ ->
+                    results
     in
-        div [ class "col-sm-8" ]
-            [ h2 [] [ text "Dates" ]
-            , viewAlert
-                { message =
-                    [ strong [] [ text "NB! " ]
-                    , text "Calendar mode is currently not very good, works ish ok on a big screen"
-                    ]
-                , color = Info
-                , onClick = Nothing
-                , dismissible = False
-                }
-            , div [ class "" ]
-                [ div [ class "row" ]
-                    (rows
-                        (cards
-                            vacationDays
-                            []
-                        )
+    div [ class "col-sm-8" ]
+        [ h2 [] [ text "Dates" ]
+        , viewAlert
+            { message =
+                [ strong [] [ text "NB! " ]
+                , text "Calendar mode is currently not very good, works ish ok on a big screen"
+                ]
+            , color = Info
+            , onClick = Nothing
+            , dismissible = False
+            }
+        , div [ class "" ]
+            [ div [ class "row" ]
+                (rows
+                    (cards
+                        vacationDays
                         []
                     )
-                ]
+                    []
+                )
             ]
+        ]
 
 
 viewLeaveDayCalendar : LeaveDay -> Html Msg
@@ -791,13 +797,12 @@ viewVacationDaysTable vacationDays =
                     , th [] [ text "Type" ]
                     ]
                 ]
-            , (case vacationDays of
+            , case vacationDays of
                 [] ->
                     text ""
 
                 _ ->
                     tbody [] <| List.map viewLeaveDayTable vacationDays
-              )
             ]
         ]
 
@@ -879,31 +884,29 @@ viewHolidays today campus =
                 l :: r :: rest ->
                     buildRows rest <|
                         result
-                            ++ [ (tr []
+                            ++ [ tr []
                                     [ td [] [ text <| dateToString l ]
                                     , td [] [ text <| dateToString r ]
                                     ]
-                                 )
                                ]
 
                 l :: rest ->
                     buildRows rest <|
                         result
-                            ++ [ (tr []
+                            ++ [ tr []
                                     [ td [] [ text <| dateToString l ]
                                     ]
-                                 )
                                ]
 
         dateToString d =
             (padded <| Date.day d) ++ "-" ++ (padded <| Date.month d) ++ "-" ++ (toString <| Date.year d)
     in
-        div [ class "col-sm-12" ]
-            [ h2 [] [ text "Public holidays" ]
-            , table [ class "table table-striped table-bordered" ]
-                [ tbody [] rows
-                ]
+    div [ class "col-sm-12" ]
+        [ h2 [] [ text "Public holidays" ]
+        , table [ class "table table-striped table-bordered" ]
+            [ tbody [] rows
             ]
+        ]
 
 
 viewTips : Html Msg
@@ -954,7 +957,7 @@ onInputWithOptions tagger =
         options =
             { preventDefault = True, stopPropagation = True }
     in
-        onWithOptions "input" options (Json.Decode.map tagger targetValue)
+    onWithOptions "input" options (Json.Decode.map tagger targetValue)
 
 
 viewDatePickerSmallScreen : String -> Maybe StdDate.Date -> Html Msg
@@ -968,28 +971,28 @@ viewDatePickerSmallScreen name value =
                 Just v ->
                     type_ <| Date.toISO8601 <| elmDateToTimeDate v
     in
-        div [ class "col-sm mt-3 d-sm-none d-md-none d-lg-none d-xl-none" ]
-            [ h2 [] [ text ("Vacation " ++ name) ]
-            , form []
-                [ div []
-                    [ input
-                        [ class "form-control"
-                        , attribute "min" "2017-01-01"
-                        , type_ "date"
-                        , pattern "[0-9]{2}-[0-9]{2}-[0-9]{4}"
-                        , onInputWithOptions
-                            (case name of
-                                "start" ->
-                                    UpdateStartDateSmallScreen
+    div [ class "col-sm mt-3 d-sm-none d-md-none d-lg-none d-xl-none" ]
+        [ h2 [] [ text ("Vacation " ++ name) ]
+        , form []
+            [ div []
+                [ input
+                    [ class "form-control"
+                    , attribute "min" "2017-01-01"
+                    , type_ "date"
+                    , pattern "[0-9]{2}-[0-9]{2}-[0-9]{4}"
+                    , onInputWithOptions
+                        (case name of
+                            "start" ->
+                                UpdateStartDateSmallScreen
 
-                                _ ->
-                                    UpdateEndDateSmallScreen
-                            )
-                        ]
-                        []
+                            _ ->
+                                UpdateEndDateSmallScreen
+                        )
                     ]
+                    []
                 ]
             ]
+        ]
 
 
 viewDatePicker : String -> DateTimePicker.State -> Maybe StdDate.Date -> Html Msg
@@ -1010,25 +1013,25 @@ viewDatePicker name state value =
                                 EndDateChanged
                         )
             in
-                { defaultDateConfig
-                    | allowYearNavigation = True
-                    , firstDayOfWeek = StdDate.Mon
-                    , i18n = { defaultDateI18n | inputFormat = customInputFormat }
-                }
+            { defaultDateConfig
+                | allowYearNavigation = True
+                , firstDayOfWeek = StdDate.Mon
+                , i18n = { defaultDateI18n | inputFormat = customInputFormat }
+            }
     in
-        div [ class "col-sm mt-3  d-none d-sm-none d-md-block d-lg-block d-xl-block" ]
-            [ h2 [] [ text ("Vacation " ++ name) ]
-            , form []
-                [ Html.node "style" [] [ Html.text css ]
-                , div []
-                    [ DateTimePicker.datePickerWithConfig
-                        datePickerConfig
-                        [ class "form-control", attribute "min" "2017-01-01" ]
-                        state
-                        value
-                    ]
+    div [ class "col-sm mt-3  d-none d-sm-none d-md-block d-lg-block d-xl-block" ]
+        [ h2 [] [ text ("Vacation " ++ name) ]
+        , form []
+            [ Html.node "style" [] [ Html.text css ]
+            , div []
+                [ DateTimePicker.datePickerWithConfig
+                    datePickerConfig
+                    [ class "form-control", attribute "min" "2017-01-01" ]
+                    state
+                    value
                 ]
             ]
+        ]
 
 
 viewAlert : Alert -> Html Msg
@@ -1037,7 +1040,7 @@ viewAlert alert =
         cssClasses =
             "ml-auto"
                 ++ " "
-                ++ (alertToBootstrapCSS alert.color)
+                ++ alertToBootstrapCSS alert.color
                 ++ " "
                 ++ (case alert.dismissible of
                         True ->
@@ -1055,18 +1058,17 @@ viewAlert alert =
                 Just click ->
                     [ class cssClasses, onClick click ]
     in
-        div
-            attr
-        <|
-            alert.message
-                ++ [ (case alert.dismissible of
-                        True ->
-                            button [ type_ "button", class "close" ] [ span [ property "innerHTML" (Json.Encode.string "&times;") ] [] ]
+    div
+        attr
+    <|
+        alert.message
+            ++ [ case alert.dismissible of
+                    True ->
+                        button [ type_ "button", class "close" ] [ span [ property "innerHTML" (Json.Encode.string "&times;") ] [] ]
 
-                        False ->
-                            text ""
-                     )
-                   ]
+                    False ->
+                        text ""
+               ]
 
 
 
@@ -1081,6 +1083,7 @@ viewCampusSelect campus =
                 [ class
                     (if element == campus then
                         "btn btn-secondary btn-lg btn-block active"
+
                      else
                         "btn btn-dark btn-lg btn-block"
                     )
@@ -1089,23 +1092,23 @@ viewCampusSelect campus =
                 ]
                 [ text <| toString element ]
     in
-        div []
-            [ div [ attribute "aria-hidden" "true", attribute "aria-labelledby" "selectCampus", class "modal fade show", attribute "role" "dialog", attribute "tabindex" "-1", style [ ( "display", "block" ) ] ]
-                [ div [ class "modal-dialog modal-sm" ]
-                    [ div [ class "modal-content" ]
-                        [ div [ class "modal-header" ] [ h4 [ class "modal-title" ] [ text "Select campus" ] ]
-                        , div [ class "modal-body" ]
-                            [ div [ class "container" ]
-                                (List.map
-                                    campusOption
-                                    Holiday.campuses
-                                )
-                            ]
+    div []
+        [ div [ attribute "aria-hidden" "true", attribute "aria-labelledby" "selectCampus", class "modal fade show", attribute "role" "dialog", attribute "tabindex" "-1", style [ ( "display", "block" ) ] ]
+            [ div [ class "modal-dialog modal-sm" ]
+                [ div [ class "modal-content" ]
+                    [ div [ class "modal-header" ] [ h4 [ class "modal-title" ] [ text "Select campus" ] ]
+                    , div [ class "modal-body" ]
+                        [ div [ class "container" ]
+                            (List.map
+                                campusOption
+                                Holiday.campuses
+                            )
                         ]
                     ]
                 ]
-            , div [ class "modal-backdrop fade show" ] []
             ]
+        , div [ class "modal-backdrop fade show" ] []
+        ]
 
 
 subscriptions : Model -> Sub Msg
@@ -1136,7 +1139,7 @@ isEndOfReferencePeriod date =
     let
         dates =
             [ ( 31, 3 )
-            , ( 30, 5 )
+            , ( 30, 6 )
             , ( 30, 9 )
             , ( 31, 12 )
             ]
@@ -1144,12 +1147,13 @@ isEndOfReferencePeriod date =
         ( year, month, day ) =
             Date.toTuple date
     in
-        List.member ( day, month ) dates
+    List.member ( day, month ) dates
 
 
 padded : Int -> String
 padded n =
     if n < 10 then
         "0" ++ toString n
+
     else
         toString n
