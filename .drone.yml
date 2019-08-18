@@ -9,7 +9,7 @@ platform:
 steps:
 - name: build
   pull: if-not-exists
-  image: banzaicloud/drone-kaniko 
+  image: banzaicloud/drone-kaniko
   settings:
     cache: true
     repo: kradalby/flexiday
