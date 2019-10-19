@@ -25,8 +25,8 @@ steps:
   pull: if-not-exists
   image: quay.io/honestbee/drone-kubernetes
   settings:
-    container: flexiday-container
-    deployment: flexiday-deployment
+    container: common
+    deployment: flexiday
     namespace: flexiday
     repo: kradalby/flexiday
     tag:
