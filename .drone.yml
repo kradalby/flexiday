@@ -9,12 +9,13 @@ node_selector:
 steps:
   - name: build
     pull: always
-    image: tuxity/drone-docker
-    privileged: true
-    environment:
-      DOCKER_BUILDKIT: 1
+    image: banzaicloud/drone-kaniko:0.5.1
+
+  - name: publish
+    pull: always
+    image: banzaicloud/drone-kaniko:0.5.1
     settings:
-      custom_dns: ["1.1.1.1"]
+      cache: true
       repo: kradalby/flexiday
       tags:
         - ${DRONE_COMMIT_SHA:0:8}
@@ -26,54 +27,39 @@ steps:
     when:
       branch:
         - master
-    #   - name: publish
-    #     pull: always
-    #     image: banzaicloud/drone-kaniko:0.5.1
-    #     settings:
-    #       cache: true
-    #       repo: kradalby/flexiday
-    #       tags:
-    #         - ${DRONE_COMMIT_SHA:0:8}
-    #         - latest
-    #       username:
-    #         from_secret: docker_username
-    #       password:
-    #         from_secret: docker_password
-    #     when:
-    #       branch:
-    #         - master
-    #
-    #   - name: deploy
-    #     pull: always
-    #     image: kradalby/drone-kubectl
-    #     environment:
-    #       KUBERNETES_CERT:
-    #         from_secret: kubernetes_cert
-    #       KUBERNETES_SERVER:
-    #         from_secret: kubernetes_server
-    #       KUBERNETES_TOKEN:
-    #         from_secret: kubernetes_token
-    #     commands:
-    #       - kubectl -n flexiday set image deployment/flexiday common=kradalby/flexiday:${DRONE_COMMIT_SHA:0:8} --record
-    #       - kubectl -n flexiday rollout status deployment flexiday
-    #     when:
-    #       branch:
-    #         - master
-    #       event:
-    #         - push
-    #
-    #   - name: notify
-    #     pull: if-not-exists
-    #     image: drillster/drone-email
-    #     settings:
-    #       from: drone@drone.fap.no
-    #       host: smtp.fap.no
-    #       port: 25
-    #       recipients:
-    #         - kradalby@kradalby.no
-    #       skip_verify: true
-    #     when:
-    #       status:
-    #         - success
-    #         - changed
-    #         - failure
+
+  - name: deploy
+    pull: always
+    image: kradalby/drone-kubectl
+    environment:
+      KUBERNETES_CERT:
+        from_secret: kubernetes_cert
+      KUBERNETES_SERVER:
+        from_secret: kubernetes_server
+      KUBERNETES_TOKEN:
+        from_secret: kubernetes_token
+    commands:
+      - kubectl -n flexiday set image deployment/flexiday common=kradalby/flexiday:${DRONE_COMMIT_SHA:0:8} --record
+      - kubectl -n flexiday rollout status deployment flexiday
+    when:
+      branch:
+        - master
+      event:
+        - push
+
+  - name: notify
+    pull: if-not-exists
+    image: drillster/drone-email
+    settings:
+      from: drone@drone.fap.no
+      host: smtp.fap.no
+      port: 25
+      recipients:
+        - kradalby@kradalby.no
+      skip_verify: true
+    when:
+      status:
+        - success
+        - changed
+        - failure
+
