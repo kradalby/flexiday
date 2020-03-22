@@ -7,9 +7,9 @@ node_selector:
   drone: "true"
 
 steps:
-    # - name: build
-    #   pull: always
-    #   image: banzaicloud/drone-kaniko
+  - name: build
+    pull: always
+    image: banzaicloud/drone-kaniko:0.5.1
 
   - name: publish
     pull: always
