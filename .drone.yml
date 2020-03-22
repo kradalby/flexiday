@@ -9,9 +9,11 @@ node_selector:
 steps:
   - name: build
     pull: always
-    image: plugins/docker
-    environment:
-      DOCKER_BUILDKIT: 1
+    image: banzaicloud/drone-kaniko
+
+  - name: publish
+    pull: always
+    image: banzaicloud/drone-kaniko
     settings:
       cache: true
       repo: kradalby/flexiday
