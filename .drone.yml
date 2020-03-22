@@ -7,13 +7,13 @@ node_selector:
   drone: "true"
 
 steps:
-  - name: build
-    pull: always
-    image: banzaicloud/drone-kaniko
+    # - name: build
+    #   pull: always
+    #   image: banzaicloud/drone-kaniko
 
   - name: publish
     pull: always
-    image: banzaicloud/drone-kaniko
+    image: banzaicloud/drone-kaniko:0.6.0
     settings:
       cache: true
       repo: kradalby/flexiday
