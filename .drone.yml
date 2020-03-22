@@ -13,7 +13,7 @@ steps:
     when:
       branch:
         exclude:
-        - master
+          - master
 
   - name: publish
     pull: always
@@ -67,3 +67,16 @@ steps:
         - changed
         - failure
 
+---
+kind: secret
+name: docker_username
+get:
+  path: docker
+  name: username
+
+---
+kind: secret
+name: docker_password
+get:
+  path: docker
+  name: password
