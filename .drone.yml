@@ -42,9 +42,10 @@ steps:
         from_secret: kubernetes_server
       KUBERNETES_TOKEN:
         from_secret: kubernetes_token
+      APP: flexiday
     commands:
-      - kubectl -n flexiday set image deployment/flexiday common=kradalby/flexiday:${DRONE_COMMIT_SHA:0:8} --record
-      - kubectl -n flexiday rollout status deployment flexiday
+      - kubectl -n $APP set image deployment/$APP common=kradalby/$APP:${DRONE_COMMIT_SHA:0:8} --record
+      - kubectl -n $APP rollout status deployment $APP
     when:
       branch:
         - master
