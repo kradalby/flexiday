@@ -30,7 +30,7 @@
     "css-loader": "1.0.0",
     "elm-hot-loader": "0.5.4",
     "elm-webpack-loader": "4.5.0",
-    "file-loader": "2.0.0",
+    "file-loader": "6.0.0",
     "node-sass": "4.13.1",
     "sass-loader": "7.1.0",
     "style-loader": "0.23.0",
