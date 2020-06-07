@@ -7,15 +7,6 @@
    },
    "steps": [
       {
-         "commands": [
-            "make install",
-            "make lint"
-         ],
-         "image": "node:10",
-         "name": "Node lint",
-         "pull": "always"
-      },
-      {
          "image": "banzaicloud/drone-kaniko:0.5.1",
          "name": "Build container image",
          "pull": "always",
