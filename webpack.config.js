@@ -1,65 +1,67 @@
-const path = require('path')
-const webpack = require('webpack')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
+const path = require("path");
+const webpack = require("webpack");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
-const elmLoader = process.env.NODE_ENV === 'development' ? 'elm-hot-loader!elm-webpack-loader?verbose=true&warn=true&debug=true' : 'elm-webpack-loader'
+const elmLoader =
+  process.env.NODE_ENV === "development"
+    ? "elm-hot-loader!elm-webpack-loader?verbose=true&warn=true&debug=true"
+    : "elm-webpack-loader";
 
 module.exports = {
   entry: {
-    app: [
-      './src/index.js'
-    ]
+    app: ["./src/index.js"],
   },
 
   output: {
-    path: path.resolve(path.join(__dirname, '/dist')),
-    filename: '[name].js'
+    path: path.resolve(path.join(__dirname, "/dist")),
+    filename: "[name].js",
   },
 
   module: {
     rules: [
       {
         test: /\.(css|scss)$/,
-        loaders: [
-          'style-loader', 'css-loader', 'sass-loader'
-        ]
+        loaders: ["style-loader", "css-loader", "sass-loader"],
       },
       {
         test: /\.html$/,
         exclude: /node_modules/,
-        loader: 'file-loader?name=[name].[ext]'
+        loader: "file-loader?name=[name].[ext]",
       },
       {
         test: /\.elm$/,
         exclude: [/elm-stuff/, /node_modules/],
-        loader: elmLoader
+        loader: elmLoader,
       },
       {
         test: /\.(png|jpg|gif|svg|eot|ttf|woff|woff2)$/,
-        loader: 'url-loader',
+        loader: "url-loader",
         options: {
-          limit: 10000
-        }
-      }
+          limit: 10000,
+        },
+      },
     ],
 
-    noParse: /\.elm$/
+    noParse: /\.elm$/,
   },
 
-  plugins: process.env.NODE_ENV === 'development' ? [] : [
-    new CopyWebpackPlugin([
-      { from: 'src/assets/favicons', to: 'favicons' }
-    ]),
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false
-      }
-    })
-  ],
+  plugins:
+    process.env.NODE_ENV === "development"
+      ? []
+      : [
+          new CopyWebpackPlugin([
+            { from: "src/assets/favicons", to: "favicons" },
+          ]),
+          new webpack.optimize.UglifyJsPlugin({
+            compress: {
+              warnings: false,
+            },
+          }),
+        ],
 
   devServer: {
     inline: true,
     stats: { colors: true },
-    disableHostCheck: true
-  }
-}
+    disableHostCheck: true,
+  },
+};
