@@ -3,41 +3,43 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="./styles.scss" />
 
     <link
       rel="apple-touch-icon"
       sizes="180x180"
-      href="/favicons/apple-touch-icon.png"
+      href="./favicon/apple-touch-icon.png"
     />
     <link
       rel="icon"
       type="image/png"
       sizes="32x32"
-      href="/favicons/favicon-32x32.png"
+      href="./favicon/favicon-32x32.png"
     />
     <link
       rel="icon"
       type="image/png"
       sizes="16x16"
-      href="/favicons/favicon-16x16.png"
+      href="./favicon/favicon-16x16.png"
     />
-    <link rel="manifest" href="/favicons/manifest.json" />
     <link
       rel="mask-icon"
-      href="/favicons/safari-pinned-tab.svg"
+      href="./favicon/safari-pinned-tab.svg"
       color="#5bbad5"
     />
-    <link rel="shortcut icon" href="/favicons/favicon.ico" />
+    <link rel="shortcut icon" href="./favicon/favicon.ico" />
     <meta name="apple-mobile-web-app-title" content="Flexiday" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="Flexiday" />
     <meta name="msapplication-TileColor" content="#343a40" />
     <meta
       name="msapplication-TileImage"
-      content="/favicons/mstile-144x144.png"
+      content="./favicon/mstile-144x144.png"
     />
-    <meta name="msapplication-config" content="/favicons/browserconfig.xml" />
     <meta name="theme-color" content="#343a40" />
+
+    <meta name="msapplication-config" content="./favicon/browserconfig.xml" />
+    <!-- <link rel="manifest" href="./favicon/manifest.webmanifest" /> -->
 
     <title>Flexiday</title>
     <script
@@ -46,8 +48,6 @@
       data-website-id="e5c93916-7526-4475-9786-4def224ded70"
       src="https://umami.kradalby.no/umami.js"
     ></script>
-  </head>
-  <body id="root">
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script
       async
@@ -62,7 +62,8 @@
 
       gtag("config", "UA-18856525-24");
     </script>
-
-    <script src="./app.js"></script>
+  </head>
+  <body id="root">
+    <script src="./index.js"></script>
   </body>
 </html>
